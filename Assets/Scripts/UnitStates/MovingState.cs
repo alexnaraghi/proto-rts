@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class MovingState : UnitState
+public class MovingState : IUnitState
 {
     private float _moveTimer;
     private float _timeToArrive;

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class AttackingState : UnitState
+public class AttackingState : IUnitState
 {
     private float _fightTimer;
     

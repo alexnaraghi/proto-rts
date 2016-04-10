@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Base : RtsObject 
+public class Base : RtsObject
 {
     public Unit ProductionUnitPrefab;
     

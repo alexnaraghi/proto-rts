@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-public class MiningState : UnitState
+public class MiningState : IUnitState
 {
     public enum MineSubState
     {

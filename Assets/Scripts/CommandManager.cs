@@ -4,10 +4,11 @@ using System.Collections.Generic;
 public class CommandManager : MonoBehaviour 
 {
 	public Queue<Command> CommandHistory = new Queue<Command>();
-    
+    public List<string> DebugCommandHistory = new List<string>();
+
     public void QueueCommand(Command command)
     {
-        Debug.Log("Command Queued: " + command.GetType().Name);
+        DebugCommandHistory.Add("Command Queued: " + command.GetType().Name);
         
         CommandHistory.Enqueue(command);
         

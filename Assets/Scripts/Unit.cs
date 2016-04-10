@@ -4,18 +4,22 @@ using System.Collections.Generic;
 public class Unit : RtsObject
 {
     
-    private readonly UnitState _idleState = new IdlingState();
+    private readonly IUnitState _idleState = new IdlingState();
 
-    public Stack<UnitState> StateStack;
+    public Stack<IUnitState> StateStack;
     public List<GameObject> UnitsInRange;
-    
+
+    //I want to keep track of all state transitions for checking a unit in the editor.
+    //Maybe make this a buffer if memory is a concern?
+    public List<string> DebugStateLog = new List<string>();
+
     public bool HasResource;
     
     protected override void Awake()
     {
         base.Awake();
         UnitsInRange = new List<GameObject>();
-        StateStack = new Stack<UnitState>();
+        StateStack = new Stack<IUnitState>();
         
         //Idling is always on the bottom of the stack.
         PushState( _idleState);
@@ -34,7 +38,7 @@ public class Unit : RtsObject
         var top = StateStack.Peek();
         if(top != null && top.IsComplete)
         {
-            Debug.Log("State popped: " + top.GetType().Name);
+            DebugStateLog.Add("State popped: " + top.GetType().Name);
             top.Exit(this);
             StateStack.Pop();
             top = StateStack.Peek();
@@ -51,12 +55,12 @@ public class Unit : RtsObject
         /*
         UnitsInRange.Add(other.gameObject);
 
-        if (CurrentState != UnitState.Fighting)
+        if (CurrentState != IUnitState.Fighting)
         {
             var otherUnit = other.GetComponent<Unit>();
             if (otherUnit != null && otherUnit.IsAlive && otherUnit.IsAttackable && otherUnit.Team != Team)
             {
-                CurrentState = UnitState.Fighting;
+                CurrentState = IUnitState.Fighting;
             }
         }
         */
@@ -104,12 +108,12 @@ public class Unit : RtsObject
         }
     }
     
-    public void PushState(UnitState state)
+    public void PushState(IUnitState state)
     {
         PushState(state, false);
     }
     
-    public void PushState(UnitState state, bool isChaining)
+    public void PushState(IUnitState state, bool isChaining)
     {
         if(!isChaining)
         {
@@ -119,10 +123,8 @@ public class Unit : RtsObject
                 poppedState.Exit(this);
             }
             StateStack.Push(_idleState);
-            Debug.Log("States cleared");
         }
-        
-        Debug.Log("State pushed, started:" + state.GetType().Name);
+        DebugStateLog.Add("State pushed, started:" + state.GetType().Name);
         StateStack.Push(state);
         state.Enter(this);
     }

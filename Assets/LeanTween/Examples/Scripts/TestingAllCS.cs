@@ -171,7 +171,9 @@ public class TestingAllCS : MonoBehaviour {
 		Debug.Log("updateValueExample");
 		Hashtable pass = new Hashtable();
 		pass.Add("message", "hi");
-		LeanTween.value( gameObject, updateValueExampleCallback, ltLogo.transform.eulerAngles.y, 270f, 1f ).setEase(LeanTweenType.easeOutElastic).setOnUpdateParam(pass).setUseEstimatedTime(useEstimatedTime);
+        // Note(alex): Commented this out to fix stupid leantween example which makes an omnisharp error.
+        // Fix this if we ever care.
+		//LeanTween.value( gameObject, updateValueExampleCallback, ltLogo.transform.eulerAngles.y, 270f, 1f ).setEase(LeanTweenType.easeOutElastic).setOnUpdateParam(pass).setUseEstimatedTime(useEstimatedTime);
 	}
 	
 	public void updateValueExampleCallback( float val, object hash ){

@@ -12,9 +12,12 @@ public class SelectionBox : MonoBehaviour
     private bool _isSelecting;
     private Vector2 _selectionStart;
     private Vector2 _selectionEnd;
+
+    public List<string> DebugSelectionLog = new List<string>();
     
     private List<RtsObject> _selectionCache = new List<RtsObject>(200);
     private List<Unit> _unitCache = new List<Unit>(200);
+    
 
     public static void ForeachSelectedObject(HashSet<int> selectedIds, Action<RtsObject> action)
     {
@@ -61,7 +64,10 @@ public class SelectionBox : MonoBehaviour
 
             if (objUnderCursor != null && objUnderCursor.IsTargetable)
             {
-                Debug.LogFormat("Targeted [{0} ({1},{2})]", objUnderCursor.ToString(), objUnderCursor.transform.position.x, objUnderCursor.transform.position.z);
+                DebugSelectionLog.Add(string.Format("Targeted [{0} ({1},{2})]", 
+                    objUnderCursor.ToString(),
+                    objUnderCursor.transform.position.x, 
+                    objUnderCursor.transform.position.z));
                 
                 var command = new TargetRtsObjectCommand(team, units, objUnderCursor, isChaining: false);
                 Injector.Get<CommandManager>().QueueCommand(command);

@@ -1,4 +1,4 @@
-﻿public interface UnitState
+﻿public interface IUnitState
 {
     bool IsComplete
     {

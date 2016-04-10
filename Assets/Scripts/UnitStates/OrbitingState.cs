@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class OrbitingState : UnitState
+public class OrbitingState : IUnitState
 {
     public RtsObject OrbitObject;
     private float _orbitTimer;

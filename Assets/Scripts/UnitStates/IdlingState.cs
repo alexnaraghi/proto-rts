@@ -1,4 +1,4 @@
-﻿public class IdlingState : UnitState
+﻿public class IdlingState : IUnitState
 {
     public IdlingState()
     {
