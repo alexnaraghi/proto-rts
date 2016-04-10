@@ -1,10 +1,9 @@
-﻿using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 
-public class SelectionBox : MonoBehaviour
+public class InputManager : MonoBehaviour
 {
     public RectTransform RectTransform;
     public Image Image;
@@ -17,7 +16,15 @@ public class SelectionBox : MonoBehaviour
     
     private List<RtsObject> _selectionCache = new List<RtsObject>(200);
     private List<Unit> _unitCache = new List<Unit>(200);
-    
+
+    private RtsInput _input;
+
+    void Start()
+    {
+        // TODO: Make dependency injection support compile time or runtime resolution of interfaces/
+        // abstract classes
+        _input = Injector.Get<RtsInput>();
+    }
 
     public static void ForeachSelectedObject(HashSet<int> selectedIds, Action<RtsObject> action)
     {
@@ -39,9 +46,9 @@ public class SelectionBox : MonoBehaviour
     void Update()
     {
         //Destination chosen
-        if (IsActionTriggered())
+        if (_input.IsActionTriggered())
         {
-            var cursorPosition = GetActionPosition();
+            var cursorPosition = _input.GetActionPosition();
             var objUnderCursor = GetObjectUnder(cursorPosition);
             
             var selectedIds = Injector.Get<GameState>().SelectedObjectIds;
@@ -81,10 +88,10 @@ public class SelectionBox : MonoBehaviour
         }
 
         //Selection finished
-        if (_isSelecting && IsSelectionFinished())
+        if (_isSelecting &&  _input.IsSelectionFinished())
         {
             _isSelecting = false;
-            _selectionEnd = GetSelectionPosition();
+            _selectionEnd =  _input.GetSelectionPosition();
 
             _selectionCache.Clear();
             SelectObjectUnder(_selectionEnd);
@@ -105,10 +112,10 @@ public class SelectionBox : MonoBehaviour
             }
         }
         //Selection started
-        else if (IsSelectionStarted())
+        else if ( _input.IsSelectionStarted())
         {
             _isSelecting = true;
-            _selectionStart = GetSelectionPosition();
+            _selectionStart =  _input.GetSelectionPosition();
 
             var localTeam = Injector.Get<GameState>().LocalTeam;
             Injector.Get<CommandManager>().QueueCommand(new UnselectAllCommand(localTeam));
@@ -120,7 +127,9 @@ public class SelectionBox : MonoBehaviour
 
             /*
             Debug.Log("Position: " + _selectionStart.x + " " + _selectionStart.y 
-                + Camera.main.ScreenToWorldPoint(new Vector3(_selectionStart.x, _selectionStart.y, 10f)).ToString());
+                + Camera.main.ScreenToWorldPoint(new Vector3(_selectionStart.x,
+                                                             _selectionStart.y, 
+                                                             10f)).ToString());
             */
         }
 
@@ -130,7 +139,7 @@ public class SelectionBox : MonoBehaviour
             if (_isSelecting)
             {
                 var startPosition = _selectionStart;
-                var endPosition = GetSelectionPosition();
+                var endPosition =  _input.GetSelectionPosition();
                 var diff = startPosition + (endPosition - startPosition) / 2;
                 var height = Mathf.Abs(endPosition.y - startPosition.y);
                 var width = Mathf.Abs(endPosition.x - startPosition.x);
@@ -191,30 +200,5 @@ public class SelectionBox : MonoBehaviour
             obj = hit.collider.gameObject.GetComponent<RtsObject>();
         }
         return obj;
-    }
-
-    private bool IsSelectionStarted()
-    {
-        return Input.GetMouseButtonDown(0);
-    }
-
-    private bool IsSelectionFinished()
-    {
-        return Input.GetMouseButtonUp(0) || IsActionTriggered();
-    }
-
-    private Vector2 GetSelectionPosition()
-    {
-        return Input.mousePosition;
-    }
-
-    private bool IsActionTriggered()
-    {
-        return Input.GetMouseButtonDown(1);
-    }
-
-    private Vector2 GetActionPosition()
-    {
-        return Input.mousePosition;
     }
 }

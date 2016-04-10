@@ -11,9 +11,8 @@ public class GameState : MonoBehaviour
     public List<RtsObject> ObjectsToDestroy;
     
     public int LocalTeam;
-
-	// Use this for initialization
-	void Start () 
+    
+    void Awake()
     {
         ObjectsToDestroy = new List<RtsObject>();
         SelectedObjectIds = new HashSet<int>();
@@ -23,7 +22,7 @@ public class GameState : MonoBehaviour
         LocalTeam = 1;
         
         Populate();
-	}
+    }
     
     void Update()
     {

@@ -16,7 +16,7 @@ public class UnselectAllCommand : Command
         
         PreviousSelections = gameState.SelectedObjectIds;
         
-        SelectionBox.ForeachSelectedObject(gameState.SelectedObjectIds, (rtsObj) =>
+        InputManager.ForeachSelectedObject(gameState.SelectedObjectIds, (rtsObj) =>
         {
             rtsObj.MySelectableObject.ToggleSelection(false);
         });

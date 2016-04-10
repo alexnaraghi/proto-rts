@@ -20,7 +20,11 @@ public class Injector
         {
             if (_go == null)
             {
-                _go = new GameObject(GO_NAME);
+                _go = GameObject.Find(GO_NAME);
+                if( _go == null)
+                {
+                    _go = new GameObject(GO_NAME);
+                }
             }
 
             return _go;
@@ -48,6 +52,22 @@ public class Injector
     public static T AddComponent<T>() where T : MonoBehaviour
     {
         var component = GO.AddComponent<T>();
+        if(_dict.ContainsKey(typeof(T)))
+        {
+            //TODO: Remove old component if dupe.
+            _dict[typeof(T)] = component;
+        }
+        else
+        {
+            _dict.Add(typeof(T), component);
+        }
+        return component;
+    }
+    
+    //Overload for adding components with an interface
+    public static V AddComponent<T, V>() where V : MonoBehaviour
+    {
+        var component = GO.AddComponent<V>();
         if(_dict.ContainsKey(typeof(T)))
         {
             //TODO: Remove old component if dupe.
