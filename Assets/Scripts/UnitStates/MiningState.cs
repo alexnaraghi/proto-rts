@@ -50,6 +50,7 @@ public class MiningState : UnitState
         if(unit.HasResource && IsAtBase(unit))
         {
             //TODO: Make a state for collecting a resource
+            Base.AddResource(1);
             unit.HasResource = false;
         }
             

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-
+[System.Serializable]
 public class TargetPositionCommand : Command
 {
     public Unit[] Attackers;

@@ -10,11 +10,10 @@ public class Unit : RtsObject
     public List<GameObject> UnitsInRange;
     
     public bool HasResource;
-
-    // Use this for initialization
-    protected override void Start()
+    
+    protected override void Awake()
     {
-        base.Start();
+        base.Awake();
         UnitsInRange = new List<GameObject>();
         StateStack = new Stack<UnitState>();
         
@@ -22,7 +21,12 @@ public class Unit : RtsObject
         PushState( _idleState);
         
         SetTeamColor(Team);
-        IsAttackable = true;
+    }
+
+    // Use this for initialization
+    protected override void Start()
+    {
+        base.Start();
     }
 
     void Update()

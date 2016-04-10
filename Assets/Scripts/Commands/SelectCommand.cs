@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine.Assertions;
 
+[System.Serializable]
 public class SelectCommand : Command 
 {
     public HashSet<int> PreviousSelections;

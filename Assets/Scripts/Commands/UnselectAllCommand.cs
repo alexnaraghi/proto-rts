@@ -1,8 +1,6 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Text;
-using UnityEngine.Assertions;
+﻿using System.Collections.Generic;
 
+[System.Serializable]
 public class UnselectAllCommand : Command 
 {
     public HashSet<int> PreviousSelections;

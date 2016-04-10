@@ -11,6 +11,9 @@ public class Formation
         Vector3 destination, 
         FormationType formationType, bool isChaining)
     {
+        //The range that we add for each new unit in the formation.
+        const float RADIUS_MAGNITUDE_SCALAR = 0.4f;
+        
         //Ignore formations if we just have one object.  If that's the case, just move it
         if(units.Length == 1)
         {
@@ -29,7 +32,7 @@ public class Formation
                 var rotation = 2 * Mathf.PI * randomRot;
                 var offset = new Vector3(
                     Mathf.Cos(rotation) / 2f, 0f, 
-                    Mathf.Sin(rotation) / 2f) * radius * randomMag;
+                    Mathf.Sin(rotation) / 2f) * radius * randomMag * RADIUS_MAGNITUDE_SCALAR;
                 
                 unit.PushState(new MovingState(destination + offset), isChaining);
             }

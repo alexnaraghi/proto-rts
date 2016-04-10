@@ -6,6 +6,8 @@ public class OrbitingState : UnitState
     private float _orbitTimer;
     private float _orbitAngle;
     
+    private bool _isFirstUpdate;
+    
     public bool IsComplete
     {
         get
@@ -20,11 +22,9 @@ public class OrbitingState : UnitState
     
     public void Enter(Unit unit)
     {
+        _isFirstUpdate = true;
         _orbitTimer = 0f;
         _orbitAngle = 0f;
-        
-        //TODO: Probably get rid of this?  Depends if we keep the scaling effect or not on bases
-        unit.transform.SetParent(OrbitObject.transform);
         
         var orbitPosition = GetOrbitPosition(unit.transform.position, OrbitObject.transform.position);
         unit.PushState(new MovingState(orbitPosition), true);
@@ -32,6 +32,12 @@ public class OrbitingState : UnitState
     
     public void Update(Unit unit)
     {
+        if(_isFirstUpdate)
+        {
+            //TODO: Probably get rid of this?  Depends if we keep the scaling effect or not on bases
+            unit.transform.SetParent(OrbitObject.transform);
+            _isFirstUpdate = false;
+        }
         /*
         const float RADIUS_PER_SECOND = 2f;
         
@@ -45,7 +51,16 @@ public class OrbitingState : UnitState
     
     public Vector3 GetOrbitPosition(Vector3 source, Vector3 orbitCenter)
     {
-        var sourceDir = (orbitCenter - source).normalized;
+        var offset = orbitCenter - source;
+        
+        // If the object is at the center, we need to spit it out
+        // in some non-zero direction.
+        if(offset.sqrMagnitude < 0.001f)
+        {
+            offset = new Vector3(1f, 0f, 1f);
+        }
+        
+        var sourceDir = offset.normalized;
         return orbitCenter - sourceDir * 2.8f;
     }
     
