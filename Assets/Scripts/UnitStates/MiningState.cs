@@ -10,8 +10,8 @@ public class MiningState : UnitState
         Unloading
     }
     
-    private Base _base;
-    private Mine _mine;
+    public Base Base;
+    public Mine Mine;
     
     public MineSubState SubState;
     
@@ -24,30 +24,43 @@ public class MiningState : UnitState
     {
         get
         {
-            return true;
+            return false;
         }
     }
 
     public MiningState(Base pBase, Mine mine)
     {
-        _base = pBase;
-        _mine = mine;
+        Base = pBase;
+        Mine = mine;
     }
     
     public void Enter(Unit unit)
     {
-        if(unit.HasResource)
-        {
-            SubState = MineSubState.MovingToBase;
-        }
-        else
-        {
-            SubState = MineSubState.MovingToMine;
-        }
+        //Everything is handled in the update loop.
     }
     
     public void Update(Unit unit)
     {
+        if(!unit.HasResource && IsAtMine(unit))
+        {
+            //TODO: Make a state for collecting a resource
+            unit.HasResource = true;
+        }
+        
+        if(unit.HasResource && IsAtBase(unit))
+        {
+            //TODO: Make a state for collecting a resource
+            unit.HasResource = false;
+        }
+            
+        if(unit.HasResource)
+        {
+            unit.PushState(new MovingState(Base.transform.position), true);
+        }
+        else
+        {
+            unit.PushState(new MovingState(Mine.transform.position), true);            
+        }
     }
     
     public void Exit(Unit unit)
@@ -55,13 +68,13 @@ public class MiningState : UnitState
         
     }
     
-    private bool IsAtMine()
+    private bool IsAtMine(Unit unit)
     {
-        return false;
+        return (Mine.transform.position - unit.transform.position).magnitude < 1f;
     }
     
-    private bool IsAtBase()
+    private bool IsAtBase(Unit unit)
     {
-        return false;
+        return (Base.transform.position - unit.transform.position).magnitude < 1f;
     }
 }

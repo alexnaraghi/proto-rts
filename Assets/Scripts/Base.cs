@@ -7,15 +7,13 @@ public class Base : RtsObject
     protected override void Start()
     {
         base.Start();
-        IsTargetable = true;
-        IsAttackable = false;
     }
     
     public override void OnTargeted(Unit targettingObject, bool isChaining)
     {
         if(targettingObject != null)
         {
-            targettingObject.QueueState(new OrbitingState(this));
+            targettingObject.PushState(new OrbitingState(this));
         }
     }
 

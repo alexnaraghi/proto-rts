@@ -14,7 +14,7 @@ public class Formation
         //Ignore formations if we just have one object.  If that's the case, just move it
         if(units.Length == 1)
         {
-            units[0].QueueState(new MovingState(destination), isChaining);
+            units[0].PushState(new MovingState(destination), isChaining);
         }
         else if(formationType == FormationType.Scattered)
         {
@@ -31,7 +31,7 @@ public class Formation
                     Mathf.Cos(rotation) / 2f, 0f, 
                     Mathf.Sin(rotation) / 2f) * radius * randomMag;
                 
-                unit.QueueState(new MovingState(destination + offset), isChaining);
+                unit.PushState(new MovingState(destination + offset), isChaining);
             }
         }
         else

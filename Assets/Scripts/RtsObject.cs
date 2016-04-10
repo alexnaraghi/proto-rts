@@ -11,7 +11,7 @@ public class RtsObject : MonoBehaviour
     public bool IsAttackable;
     
     //Can be targetted and moved to
-    public bool IsTargetable = true;
+    public bool IsTargetable;
     
     public int Team;
     

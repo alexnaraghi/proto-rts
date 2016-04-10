@@ -17,7 +17,7 @@ public class Mine : RtsObject
     {
         if(targettingUnit != null)
         {
-            targettingUnit.QueueState(new MiningState(ClosestBase, this), isChaining);
+            targettingUnit.PushState(new MiningState(ClosestBase, this), isChaining);
         }
     }
 

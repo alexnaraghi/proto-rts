@@ -19,7 +19,7 @@ public class Unit : RtsObject
         StateStack = new Stack<UnitState>();
         
         //Idling is always on the bottom of the stack.
-        QueueState( _idleState);
+        PushState( _idleState);
         
         SetTeamColor(Team);
         IsAttackable = true;
@@ -100,16 +100,20 @@ public class Unit : RtsObject
         }
     }
     
-    public void QueueState(UnitState state)
+    public void PushState(UnitState state)
     {
-        QueueState(state, false);
+        PushState(state, false);
     }
     
-    public void QueueState(UnitState state, bool isChaining)
+    public void PushState(UnitState state, bool isChaining)
     {
         if(!isChaining)
         {
-            StateStack.Clear();
+            while (StateStack.Count > 0)
+            {
+                var poppedState = StateStack.Pop();
+                poppedState.Exit(this);
+            }
             StateStack.Push(_idleState);
             Debug.Log("States cleared");
         }
@@ -137,6 +141,6 @@ public class Unit : RtsObject
     
     public override void OnTargeted(Unit attacker, bool isChaining)
     {
-        attacker.QueueState(new AttackingState(this), isChaining);
+        attacker.PushState(new AttackingState(this), isChaining);
     }
 }

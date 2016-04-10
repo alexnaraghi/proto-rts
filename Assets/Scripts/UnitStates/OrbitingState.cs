@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-
 
 public class OrbitingState : UnitState
 {
@@ -12,7 +10,7 @@ public class OrbitingState : UnitState
     {
         get
         {
-            return true;
+            return false;
         }
     }
     public OrbitingState(RtsObject orbitObject)
@@ -22,25 +20,37 @@ public class OrbitingState : UnitState
     
     public void Enter(Unit unit)
     {
+        _orbitTimer = 0f;
+        _orbitAngle = 0f;
         
-            //     _orbitTimer = 0f;
-            //     _orbitAngle = 0f;
-            //     OrbitObject = objectToOrbit;
-            // gameObject.transform.SetParent(objectToOrbit.gameObject.transform);
-            // UpdateState(UnitState.Orbiting);
+        //TODO: Probably get rid of this?  Depends if we keep the scaling effect or not on bases
+        unit.transform.SetParent(OrbitObject.transform);
+        
+        var orbitPosition = GetOrbitPosition(unit.transform.position, OrbitObject.transform.position);
+        unit.PushState(new MovingState(orbitPosition), true);
     }
     
     public void Update(Unit unit)
     {
-        // const float RADIUS_PER_SECOND = 2f;
-        //         _orbitAngle += RADIUS_PER_SECOND * _orbitTimer;
-        //         gameObject.transform.Rotate(OrbitObject.transform.position, _orbitAngle, Space.Self);
+        /*
+        const float RADIUS_PER_SECOND = 2f;
+        
+        _orbitAngle += RADIUS_PER_SECOND * _orbitTimer;
+        var axis = unit.transform.position - OrbitObject.transform.position;
+        unit.transform.Rotate(axis, _orbitAngle, Space.Self);
+          */
                 
-        //         _orbitTimer += Time.deltaTime;
+        _orbitTimer += Time.deltaTime;
+    }
+    
+    public Vector3 GetOrbitPosition(Vector3 source, Vector3 orbitCenter)
+    {
+        var sourceDir = (orbitCenter - source).normalized;
+        return orbitCenter - sourceDir * 2.8f;
     }
     
     public void Exit(Unit unit)
     {
-        
+        unit.transform.SetParent(null);
     }
 }

@@ -151,7 +151,6 @@ public class SelectionBox : MonoBehaviour
         float right = Mathf.Max(startPosition.x, endPosition.x);
         var rect = new Rect(left, bottom, right - left, top - bottom);
         
-        _selectionCache.Clear();
         foreach (var rtsObj in gameState.RtsObjects.Values)
         {
             var objPos = Camera.main.WorldToScreenPoint(rtsObj.transform.position);
