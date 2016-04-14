@@ -2,12 +2,16 @@
 
 public class OrbitingState : IUnitState
 {
-    public RtsObject OrbitObject;
-    private float _orbitTimer;
-    private float _orbitAngle;
-    
-    private bool _isFirstUpdate;
-    
+    private const float DESIRED_ORBIT_VELOCITY = 2.5f;
+    private readonly Vector3 UP = new Vector3(0, 1, 0);
+
+    private  RtsObject _orbitObject;
+    private float _orbitRadius;
+
+    //Some randomized variables so our orbits aren't completely uniform
+    private float _personalDesiredVelocity;
+    private float _personalRadius;
+
     public bool IsComplete
     {
         get
@@ -15,57 +19,55 @@ public class OrbitingState : IUnitState
             return false;
         }
     }
-    public OrbitingState(RtsObject orbitObject)
+    public OrbitingState(RtsObject orbitObject, float orbitRadius)
     {
-        OrbitObject = orbitObject;
+        _orbitObject = orbitObject;
+        _orbitRadius = orbitRadius;
     }
     
     public void Enter(Unit unit)
     {
-        _isFirstUpdate = true;
-        _orbitTimer = 0f;
-        _orbitAngle = 0f;
-        
-        var orbitPosition = GetOrbitPosition(unit.transform.position, OrbitObject.transform.position);
-        unit.PushState(new MovingState(orbitPosition), true);
+        _personalDesiredVelocity = DESIRED_ORBIT_VELOCITY * Random.Range(0.95f, 1.15f);
+        _personalRadius = _orbitRadius * Random.Range(0.95f, 1.15f);
     }
     
     public void Update(Unit unit)
     {
-        if(_isFirstUpdate)
-        {
-            //TODO: Probably get rid of this?  Depends if we keep the scaling effect or not on bases
-            unit.transform.SetParent(OrbitObject.transform);
-            _isFirstUpdate = false;
-        }
-        /*
-        const float RADIUS_PER_SECOND = 2f;
+
+        var displacementToOrbitCenter = _orbitObject.transform.position - unit.transform.position;
         
-        _orbitAngle += RADIUS_PER_SECOND * _orbitTimer;
-        var axis = unit.transform.position - OrbitObject.transform.position;
-        unit.transform.Rotate(axis, _orbitAngle, Space.Self);
-          */
-                
-        _orbitTimer += Time.deltaTime;
-    }
-    
-    public Vector3 GetOrbitPosition(Vector3 source, Vector3 orbitCenter)
-    {
-        var offset = orbitCenter - source;
+        var distance = displacementToOrbitCenter.magnitude;
         
-        // If the object is at the center, we need to spit it out
-        // in some non-zero direction.
-        if(offset.sqrMagnitude < 0.001f)
+        // If we are right at the center, make up a direction
+        if(distance < float.Epsilon)
         {
-            offset = new Vector3(1f, 0f, 1f);
+            displacementToOrbitCenter = new Vector3(0, 0, 1);
         }
         
-        var sourceDir = offset.normalized;
-        return orbitCenter - sourceDir * 2.8f;
+        var perpVec = Vector3.Cross(displacementToOrbitCenter, UP);
+        var tangentPoint = _orbitObject.transform.position + perpVec.normalized * _personalRadius;
+
+        var velocity0 = unit.Velocity0.magnitude;
+
+        Vector3 acceleration = Vector3.zero;
+        
+        // Don't go too fast to orbit
+        if(velocity0 > DESIRED_ORBIT_VELOCITY)
+        {
+            acceleration += -unit.Velocity0;
+        }
+        
+        // The "correct" way to float around at a constant angular velocity is a = s^2 / r,
+        // but it seems that on a timestep basis it makes more sense to just correct ourselves
+        // along the tangent vector.
+        var direction = (tangentPoint - unit.transform.position).normalized;
+        var accelerationMagnitude = _personalDesiredVelocity;
+        acceleration += direction * accelerationMagnitude;
+
+        unit.Acceleration = acceleration;
     }
     
     public void Exit(Unit unit)
     {
-        unit.transform.SetParent(null);
     }
 }

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 
 public class Unit : RtsObject
 {
-    
+    public const float MaxVelocity = 20f;
+    public const float MaxAcceleration = 5f;
+    private const float FRICTION_COEFICIENT = 4f;
     private readonly IUnitState _idleState = new IdlingState();
 
     public Stack<IUnitState> StateStack;
@@ -14,16 +16,20 @@ public class Unit : RtsObject
     public List<string> DebugStateLog = new List<string>();
 
     public bool HasResource;
-    
+
+    public Vector3 Acceleration;
+    public Vector3 Velocity0
+    {
+        get;
+        private set;
+    }
+
     protected override void Awake()
     {
         base.Awake();
         UnitsInRange = new List<GameObject>();
         StateStack = new Stack<IUnitState>();
-        
-        //Idling is always on the bottom of the stack.
-        PushState( _idleState);
-        
+
         SetTeamColor(Team);
     }
 
@@ -31,24 +37,69 @@ public class Unit : RtsObject
     protected override void Start()
     {
         base.Start();
+
+        _idleState.Enter(this);
     }
 
     void Update()
     {
-        var top = StateStack.Peek();
-        if(top != null && top.IsComplete)
+        IUnitState top = null;
+        if (StateStack.Count > 0)
+        {
+            top = StateStack.Peek();
+        }
+        if (top != null && top.IsComplete)
         {
             DebugStateLog.Add("State popped: " + top.GetType().Name);
             top.Exit(this);
             StateStack.Pop();
-            top = StateStack.Peek();
+            
+            if(StateStack.Count > 0)
+            {
+                top = StateStack.Peek();
+            }
+            else
+            {
+                _idleState.Enter(this);
+            }
         }
-        
-        if(top != null)
+
+        if (top != null)
         {
             top.Update(this);
         }
+        else
+        {
+            _idleState.Update(this);
+        }
     }
+
+    void LateUpdate()
+    {
+        Acceleration = Vector3.ClampMagnitude(Acceleration, MaxAcceleration);
+
+        //I think we need to do some friction here to make the unit at rest at really low speeds..
+        if (Velocity0.magnitude < 2f && Acceleration.magnitude < 0.01f)
+        {
+            var friction = -FRICTION_COEFICIENT * Velocity0;
+            Acceleration += friction;
+        }
+
+        var position0 = transform.position;
+        var positionDelta = 0.5f * Acceleration * (Time.deltaTime * Time.deltaTime)
+                             + Velocity0 * Time.deltaTime;
+        var position = position0 + positionDelta;
+
+        // Apply forces
+        transform.position = position;
+
+        // Prepare for next frame
+        Velocity0 = Velocity0 + Acceleration * Time.deltaTime;
+        Velocity0 = Vector3.ClampMagnitude(Velocity0, MaxVelocity);
+
+        Acceleration = Vector3.zero;
+    }
+
 
     void OnTriggerEnter(Collider other)
     {
@@ -75,9 +126,9 @@ public class Unit : RtsObject
         {
             Target = null;
         }*/
-        
+
     }
-    
+
     public void SetTeamColor(int teamNumber)
     {
         const string MATERIALS_PATH = "Materials/";
@@ -107,28 +158,27 @@ public class Unit : RtsObject
             renderer.material = resource;
         }
     }
-    
+
     public void PushState(IUnitState state)
     {
         PushState(state, false);
     }
-    
+
     public void PushState(IUnitState state, bool isChaining)
     {
-        if(!isChaining)
+        if (!isChaining)
         {
             while (StateStack.Count > 0)
             {
                 var poppedState = StateStack.Pop();
                 poppedState.Exit(this);
             }
-            StateStack.Push(_idleState);
         }
         DebugStateLog.Add("State pushed, started:" + state.GetType().Name);
         StateStack.Push(state);
         state.Enter(this);
     }
-    
+
     /*
     //Do something when ordered
     public override void OnOrder(Vector3 destination)
@@ -144,7 +194,7 @@ public class Unit : RtsObject
             destinationObject.OnTargeted(this);
         }
     }*/
-    
+
     public override void OnTargeted(Unit attacker, bool isChaining)
     {
         attacker.PushState(new AttackingState(this), isChaining);

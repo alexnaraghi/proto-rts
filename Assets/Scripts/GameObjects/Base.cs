@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Base : RtsObject
 {
+    private const float ORBIT_RADIUS = 2.5f;
     public Unit ProductionUnitPrefab;
     
     public List<Unit> OrbitingObjects;
@@ -50,7 +51,7 @@ public class Base : RtsObject
     {
         if(targettingObject != null)
         {
-            targettingObject.PushState(new OrbitingState(this));
+            targettingObject.PushState(new OrbitingState(this, ORBIT_RADIUS));
         }
     }
     
@@ -66,7 +67,7 @@ public class Base : RtsObject
         //TODO: use the right team
         unit.Team = 1;
         unit.transform.position = transform.position;
-        unit.PushState(new OrbitingState(this), true);
+        unit.PushState(new OrbitingState(this, ORBIT_RADIUS), true);
     }
     
 }
