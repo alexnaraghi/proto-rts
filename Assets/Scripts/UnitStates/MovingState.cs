@@ -29,6 +29,12 @@ public class MovingState : IUnitState
     
     public void Update(Unit unit)
     {
+        if(unit.Aggro != null && unit.Aggro.Target != null)
+        {
+            unit.PushState(new AttackingState(unit.Aggro.Target), true);
+            return;
+        }
+        
         var displacement = _destination - unit.transform.position;
         var distance = displacement.magnitude;
         

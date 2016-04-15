@@ -41,6 +41,12 @@ public class MiningState : IUnitState
     
     public void Update(Unit unit)
     {
+        if(unit.Aggro != null && unit.Aggro.Target != null)
+        {
+            unit.PushState(new AttackingState(unit.Aggro.Target), true);
+            return;
+        }
+        
         if(!unit.HasResource && IsAtMine(unit))
         {
             //TODO: Make a state for collecting a resource

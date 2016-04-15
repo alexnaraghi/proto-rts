@@ -3,13 +3,21 @@ using System.Collections.Generic;
 
 public class Unit : RtsObject
 {
-    public const float MaxVelocity = 20f;
+    public const float MaxVelocity = 10f;
     public const float MaxAcceleration = 5f;
     private const float FRICTION_COEFICIENT = 4f;
     private readonly IUnitState _idleState = new IdlingState();
 
     public Stack<IUnitState> StateStack;
     public List<GameObject> UnitsInRange;
+
+    public GameObject ExplosionPrefab;
+
+    public Aggro Aggro
+    {
+        get; 
+        private set;
+    }
 
     //I want to keep track of all state transitions for checking a unit in the editor.
     //Maybe make this a buffer if memory is a concern?
@@ -29,6 +37,8 @@ public class Unit : RtsObject
         base.Awake();
         UnitsInRange = new List<GameObject>();
         StateStack = new Stack<IUnitState>();
+
+        Aggro = GetComponentInChildren<Aggro>();
 
         SetTeamColor(Team);
     }
@@ -128,6 +138,14 @@ public class Unit : RtsObject
         }*/
 
     }
+    
+    public bool HasAggro
+    {
+        get
+        {
+            return UnitsInRange.Count > 0;
+        }
+    }
 
     public void SetTeamColor(int teamNumber)
     {
@@ -198,5 +216,13 @@ public class Unit : RtsObject
     public override void OnTargeted(Unit attacker, bool isChaining)
     {
         attacker.PushState(new AttackingState(this), isChaining);
+    }
+    
+    public void CreateExplosion()
+    {
+        if(ExplosionPrefab != null)
+        {
+            Instantiate(ExplosionPrefab, transform.position, Quaternion.identity);
+        }
     }
 }

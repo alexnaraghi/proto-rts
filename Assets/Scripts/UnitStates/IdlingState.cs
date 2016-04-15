@@ -24,20 +24,34 @@ public class IdlingState : IUnitState
 
     public void Update(Unit unit)
     {
-        //TODO: Do some handling for if someone entered our attack range.
-
-
+        if(unit.Aggro != null && unit.Aggro.Target != null)
+        {
+            unit.PushState(new AttackingState(unit.Aggro.Target), true);
+            return;
+        }
+        
         var randomAcceleration = Random.Range(0, IDLING_ACCELERATION);
 
+        var acceleration = Vector3.zero;
+
+        // slow down idling dudes who are moving fast from another state
+        if(unit.Velocity0.sqrMagnitude > 0.3f)
+        {
+            acceleration += -unit.Velocity0;
+        }
+        
+        //Do some little movement to make idling interesting
         var direction = (unit.transform.position - _pivotPosition).normalized;
         if (direction == Vector3.zero)
         {
-            unit.Acceleration = new Vector3(1, -0.1f, 1) * randomAcceleration;
+            acceleration += new Vector3(1, -0.1f, 1) * randomAcceleration;
         }
         else
         {
-            unit.Acceleration = -direction * randomAcceleration;
+            acceleration += -direction * randomAcceleration;
         }
+
+        unit.Acceleration = acceleration;
     }
 
     public void Exit(Unit unit)

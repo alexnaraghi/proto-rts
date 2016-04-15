@@ -33,7 +33,12 @@ public class OrbitingState : IUnitState
     
     public void Update(Unit unit)
     {
-
+        if(unit.Aggro != null && unit.Aggro.Target != null)
+        {
+            unit.PushState(new AttackingState(unit.Aggro.Target), true);
+            return;
+        }
+        
         var displacementToOrbitCenter = _orbitObject.transform.position - unit.transform.position;
         
         var distance = displacementToOrbitCenter.magnitude;

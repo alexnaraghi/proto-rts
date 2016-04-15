@@ -1,89 +1,79 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
 public class AttackingState : IUnitState
 {
     private float _fightTimer;
     
-    public RtsObject Target;
+    private RtsObject _target;
     
     public bool IsComplete
     {
-        get
-        {
-            return true;
-        }
+        get;
+        private set;
     }
     public AttackingState(RtsObject attackObject)
     {
-        Target = attackObject;
+        _target = attackObject;
     }
     
     public void Enter(Unit unit)
     {
+        Debug.Log("Unit is attacking");
     }
     
     public void Update(Unit unit)
     {
-        //If we don't have a target, find one.
-            // bool hasTarget = false;
-            // if (Target != null && Target.IsAlive && Target.CurrentState == UnitState.Fighting)
-            // {
-            //     hasTarget = true;
+        //Decision: once a unit decides to attack, there's no turning back.
+        
+        if(!_target.IsAlive)
+        {
+            IsComplete = true;
+            return;
+        }
 
-            //     if (_fightTimer >= LIFE_SECONDS)
-            //     {
-            //         LeanTween.cancel(gameObject);
-            //         Injector.Get<GameState>().Kill(this);
-            //         return;
-            //     }
-            // }
+        Vector3 displacement = _target.transform.position - unit.transform.position;
+        Vector3 moveTo;
 
-            // if (Target == null || !Target.gameObject.activeSelf)
-            // {
-            //     foreach (var other in UnitsInRange)
-            //     {
-            //         if (other == null)
-            //         {
-            //             //TODO: remove from list.
-            //         }
-            //         else
-            //         {
-            //             var otherUnit = other.GetComponent<Unit>();
-            //             if (otherUnit != null && otherUnit.IsAlive && otherUnit.Team != Team)
-            //             {
-            //                 //We should fight!
-            //                 UpdateState(UnitState.Fighting);
-            //                 Target = otherUnit;
-            //                 hasTarget = true;
-            //                 _fightTimer = 0;
+        //HACK : TODO: Get rid of this stupid cast
+        if(_target is Unit)
+        {
+            moveTo = displacement
+                + (_target as Unit).Velocity0 
+                - unit.Velocity0;            
+        }
+        else
+        {
+            moveTo = displacement;
+        }
 
-            //                 //Do some fighting thing.
-            //                 LeanTween.scale(gameObject, Vector3.one, 1f)
-            //                     .setEase(LeanTweenType.easeInOutElastic)
-            //                     .setLoopPingPong();
-            //                 break;
-            //             }
-            //         }
+        if(displacement.magnitude < 0.5f)
+        {
+            unit.CreateExplosion();
+            Injector.Get<GameState>().Kill(unit);
+            Injector.Get<GameState>().Kill(_target);
+            IsComplete = true;
+            return;
+        }
+        
+        Vector3 acceleration = Vector3.zero;
 
-            //     }
-                
-            //     if (!hasTarget)
-            // {
-            //     _fightTimer = 0;
-                
-            //     //If we have no targets, go back to what we were doing.
-            //     if (HasDestination)
-            //     {
-            //         UpdateState(UnitState.Moving);
-            //     }
-            //     else
-            //     {
-            //         UpdateState(UnitState.Idle);
-            //     }
-            // }
+        var moveToUnit = (moveTo).normalized;
+        var velocityUnit = unit.Velocity0.normalized;
 
-            // _fightTimer += Time.deltaTime;
+        // If we are going way off from our destination, we need to dampen velocity and change course.
+        var trajectoryDot = Vector3.Dot(moveToUnit, velocityUnit);
+        if (trajectoryDot < 0.95f)
+        {
+            var correctionAcceleration = -unit.Velocity0 * Unit.MaxAcceleration;
+        
+            acceleration += correctionAcceleration;
+        }
+
+        //I think it probably makes sense to target where they are going, rather than where they are,
+        //but we'll leave this for now since the mechanics probably are ok with this.
+        acceleration += (displacement).normalized * Unit.MaxAcceleration;
+
+        unit.Acceleration = acceleration;
     }
     
     public void Exit(Unit unit)

@@ -58,11 +58,11 @@ public class GameState : MonoBehaviour
         }
     }
     
-    public void Kill(Unit unit)
+    public void Kill(RtsObject rtsObject)
     {
-        Assert.IsNotNull(unit);
+        Assert.IsNotNull(rtsObject);
         
-        var id = unit.Id;
+        var id = rtsObject.Id;
         if(RtsObjects.ContainsKey(id))
         {
             var foundUnit = RtsObjects[id];
