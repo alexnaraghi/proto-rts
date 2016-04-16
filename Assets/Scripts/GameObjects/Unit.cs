@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 public class Unit : RtsObject
 {
-    public const float MaxVelocity = 10f;
-    public const float MaxAcceleration = 5f;
+    public const float MaxVelocity = 5f;
+    public const float MaxAcceleration = 2f;
     private const float FRICTION_COEFICIENT = 4f;
     private readonly IUnitState _idleState = new IdlingState();
 
@@ -53,6 +53,11 @@ public class Unit : RtsObject
 
     void Update()
     {
+        if(!IsAlive)
+        {
+            return;
+        }
+        
         IUnitState top = null;
         if (StateStack.Count > 0)
         {
@@ -102,6 +107,17 @@ public class Unit : RtsObject
 
         // Apply forces
         transform.position = position;
+
+        // Bound the unit position to the map bounds.
+        //
+        // We need to bound velocity as well, so units don't get "caught" on the border of the map.
+        // or maybe we should just prevent this entirely through the selection mechanic.
+        // I'll just use this for now for testing so we don't get objects flying outside the camera
+        // bounds.
+        var bounds = Injector.Get<GameState>().MapBounds;
+        transform.position = new Vector3(Mathf.Clamp(transform.position.x, -bounds.x, bounds.x),
+                                         Mathf.Clamp(transform.position.y, -bounds.y, bounds.y),
+                                         Mathf.Clamp(transform.position.z, -bounds.z, bounds.z));
 
         // Prepare for next frame
         Velocity0 = Velocity0 + Acceleration * Time.deltaTime;

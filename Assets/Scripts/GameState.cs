@@ -11,7 +11,10 @@ public class GameState : MonoBehaviour
     public List<RtsObject> ObjectsToDestroy;
     
     public int LocalTeam;
-    
+
+    // The map's bounding rectangle in units, represented as the half-width,length,height
+    public Vector3 MapBounds = new Vector3(150, 80, 80);
+
     void Awake()
     {
         ObjectsToDestroy = new List<RtsObject>();

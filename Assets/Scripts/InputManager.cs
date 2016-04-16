@@ -49,55 +49,66 @@ public class InputManager : MonoBehaviour
         if (_input.IsActionTriggered())
         {
             var cursorPosition = _input.GetActionPosition();
-            var objUnderCursor = GetObjectUnder(cursorPosition);
-            
-            var selectedIds = Injector.Get<GameState>().SelectedObjectIds;
-            var team = Injector.Get<GameState>().LocalTeam;
-            
-            _unitCache.Clear();
-            ForeachSelectedObject(selectedIds, rtsObj =>
-                {
-                    var unit = rtsObj.GetComponent<Unit>();
-                    if(unit)
-                    {
-                        _unitCache.Add(unit);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("not unit");
-                    }
-                });
-            var units = _unitCache.ToArray();
 
-            if (objUnderCursor != null && objUnderCursor.IsTargetable)
+            // don't select anything outsize the map bounds.
+            var bounds = Injector.Get<GameState>().MapBounds;
+            var worldPosition = ConvertToWorld(cursorPosition);
+            
+            bool isInBounds = Mathf.Abs(worldPosition.x) < bounds.x
+                                && Mathf.Abs(worldPosition.z) < bounds.z;
+
+            if (isInBounds)
             {
-                DebugSelectionLog.Add(string.Format("Targeted [{0} ({1},{2})]", 
-                    objUnderCursor.ToString(),
-                    objUnderCursor.transform.position.x, 
-                    objUnderCursor.transform.position.z));
-                
-                var command = new TargetRtsObjectCommand(team, units, objUnderCursor, isChaining: false);
-                Injector.Get<CommandManager>().QueueCommand(command);
-            }
-            else
-            {
-                var destination = ConvertToWorld(cursorPosition);
-                var command = new TargetPositionCommand(team, units, destination, isChaining: false);
-                Injector.Get<CommandManager>().QueueCommand(command);
+                var objUnderCursor = GetObjectUnder(cursorPosition);
+
+                var selectedIds = Injector.Get<GameState>().SelectedObjectIds;
+                var team = Injector.Get<GameState>().LocalTeam;
+
+                _unitCache.Clear();
+                ForeachSelectedObject(selectedIds, rtsObj =>
+                    {
+                        var unit = rtsObj.GetComponent<Unit>();
+                        if (unit)
+                        {
+                            _unitCache.Add(unit);
+                        }
+                        else
+                        {
+                            Debug.LogWarning("not unit");
+                        }
+                    });
+                var units = _unitCache.ToArray();
+
+                if (objUnderCursor != null && objUnderCursor.IsTargetable)
+                {
+                    DebugSelectionLog.Add(string.Format("Targeted [{0} ({1},{2})]",
+                        objUnderCursor.ToString(),
+                        objUnderCursor.transform.position.x,
+                        objUnderCursor.transform.position.z));
+
+                    var command = new TargetRtsObjectCommand(team, units, objUnderCursor, isChaining: false);
+                    Injector.Get<CommandManager>().QueueCommand(command);
+                }
+                else
+                {
+                    var destination = ConvertToWorld(cursorPosition);
+                    var command = new TargetPositionCommand(team, units, destination, isChaining: false);
+                    Injector.Get<CommandManager>().QueueCommand(command);
+                }
             }
         }
 
         //Selection finished
-        if (_isSelecting &&  _input.IsSelectionFinished())
+        if (_isSelecting && _input.IsSelectionFinished())
         {
             _isSelecting = false;
-            _selectionEnd =  _input.GetSelectionPosition();
+            _selectionEnd = _input.GetSelectionPosition();
 
             _selectionCache.Clear();
             SelectObjectUnder(_selectionEnd);
             SelectObjects(_selectionStart, _selectionEnd);
-            
-            if(_selectionCache.Count > 0)
+
+            if (_selectionCache.Count > 0)
             {
                 //Queue up the command
                 var selectionArray = _selectionCache.ToArray();
@@ -112,10 +123,10 @@ public class InputManager : MonoBehaviour
             }
         }
         //Selection started
-        else if ( _input.IsSelectionStarted())
+        else if (_input.IsSelectionStarted())
         {
             _isSelecting = true;
-            _selectionStart =  _input.GetSelectionPosition();
+            _selectionStart = _input.GetSelectionPosition();
 
             var localTeam = Injector.Get<GameState>().LocalTeam;
             Injector.Get<CommandManager>().QueueCommand(new UnselectAllCommand(localTeam));
@@ -133,13 +144,46 @@ public class InputManager : MonoBehaviour
             */
         }
 
+        //Camera zooming
+        {
+            const float ZOOM_SPEED_SCALAR = 15f;
+
+            //The orthographic size limits
+            const float MIN_ZOOM_SIZE = 4f;
+            const float MAX_ZOOM_SIZE = 50f;
+
+            var distance = _input.GetSpeedZ() * ZOOM_SPEED_SCALAR;
+            var currentSize = Camera.main.orthographicSize;
+            
+            Camera.main.orthographicSize = Mathf.Clamp(currentSize - distance, 
+                                                       MIN_ZOOM_SIZE, 
+                                                       MAX_ZOOM_SIZE);
+        }
+
+        //Camera panning
+        if (_input.IsPanning())
+        {
+            const float MOVE_SPEED_SCALAR = 0.05f;
+
+            //Get the bounds of the unit movement.
+            var bounds = Injector.Get<GameState>().MapBounds;
+
+            float moveSpeed = Camera.main.orthographicSize * MOVE_SPEED_SCALAR;
+
+            var position0 = Camera.main.transform.position;
+            var x = Mathf.Clamp(position0.x - _input.GetSpeedX() * moveSpeed, -bounds.x, bounds.x);
+            var z = Mathf.Clamp(position0.z - _input.GetSpeedY() * moveSpeed, -bounds.z, bounds.z);
+            
+            Camera.main.transform.position = new Vector3(x, position0.y, z);
+        }
+
         //Adjust rectangle display
         if (RectTransform != null)
         {
             if (_isSelecting)
             {
                 var startPosition = _selectionStart;
-                var endPosition =  _input.GetSelectionPosition();
+                var endPosition = _input.GetSelectionPosition();
                 var diff = startPosition + (endPosition - startPosition) / 2;
                 var height = Mathf.Abs(endPosition.y - startPosition.y);
                 var width = Mathf.Abs(endPosition.x - startPosition.x);

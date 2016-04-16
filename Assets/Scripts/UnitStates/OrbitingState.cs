@@ -27,8 +27,8 @@ public class OrbitingState : IUnitState
     
     public void Enter(Unit unit)
     {
-        _personalDesiredVelocity = DESIRED_ORBIT_VELOCITY * Random.Range(0.95f, 1.15f);
-        _personalRadius = _orbitRadius * Random.Range(0.95f, 1.15f);
+        _personalDesiredVelocity = DESIRED_ORBIT_VELOCITY * Random.Range(0.8f, 1.2f);
+        _personalRadius = _orbitRadius * Random.Range(0.8f, 1.2f);
     }
     
     public void Update(Unit unit)

@@ -26,4 +26,24 @@ public class KeyboardAndMouseInput : RtsInput
     {
         return Input.mousePosition;
     }
+    
+    public override bool IsPanning()
+    {
+        return Input.GetMouseButton(2);
+    }
+    
+    public override float GetSpeedX()
+    {
+        return Input.GetAxis("Mouse X");
+    }
+    
+    public override float GetSpeedY()
+    {
+        return Input.GetAxis("Mouse Y");
+    }
+    
+    public override float GetSpeedZ()
+    {
+        return Input.GetAxis("Mouse ScrollWheel");
+    }
 }

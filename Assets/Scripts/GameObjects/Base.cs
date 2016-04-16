@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Base : RtsObject
 {
-    private const float ORBIT_RADIUS = 2.5f;
+    private const float ORBIT_RADIUS = 25f;
     public Unit ProductionUnitPrefab;
     
     public List<Unit> OrbitingObjects;

@@ -3,7 +3,7 @@ using System.Collections;
 
 public class SelectableObject : MonoBehaviour 
 {
-    public MeshRenderer HighlightObject;
+    public GameObject HighlightObject;
     
     Color _originalColor;
     
@@ -11,21 +11,14 @@ public class SelectableObject : MonoBehaviour
     {
         if(HighlightObject != null)
         {
-            HighlightObject.enabled = false;
+            HighlightObject.SetActive(false);
         }
     }
 	public void ToggleSelection(bool isOn)
     {
         if(HighlightObject != null)
         {
-            if(isOn)
-            {
-                HighlightObject.enabled = true;
-            }
-            else
-            {
-                HighlightObject.enabled = false;                
-            }
+            HighlightObject.SetActive(isOn);
         }
     }
 }
