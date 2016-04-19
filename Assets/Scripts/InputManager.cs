@@ -7,12 +7,12 @@ public class InputManager : MonoBehaviour
 {
     public RectTransform RectTransform;
     public Image Image;
+    public List<string> DebugSelectionLog = new List<string>();
 
     private bool _isSelecting;
     private Vector2 _selectionStart;
     private Vector2 _selectionEnd;
 
-    public List<string> DebugSelectionLog = new List<string>();
     
     private List<RtsObject> _selectionCache = new List<RtsObject>(200);
     private List<Unit> _unitCache = new List<Unit>(200);
@@ -45,6 +45,12 @@ public class InputManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(_input.IsQuitting())
+        {
+            Application.Quit();
+            return;
+        }
+        
         //Destination chosen
         if (_input.IsActionTriggered())
         {
@@ -68,6 +74,7 @@ public class InputManager : MonoBehaviour
                 ForeachSelectedObject(selectedIds, rtsObj =>
                     {
                         var unit = rtsObj.GetComponent<Unit>();
+                        
                         if (unit)
                         {
                             _unitCache.Add(unit);
@@ -79,7 +86,7 @@ public class InputManager : MonoBehaviour
                     });
                 var units = _unitCache.ToArray();
 
-                if (objUnderCursor != null && objUnderCursor.IsTargetable)
+                if (objUnderCursor != null && objUnderCursor.IsTargetable )
                 {
                     DebugSelectionLog.Add(string.Format("Targeted [{0} ({1},{2})]",
                         objUnderCursor.ToString(),
@@ -150,7 +157,7 @@ public class InputManager : MonoBehaviour
 
             //The orthographic size limits
             const float MIN_ZOOM_SIZE = 4f;
-            const float MAX_ZOOM_SIZE = 50f;
+            const float MAX_ZOOM_SIZE = 70f;
 
             var distance = _input.GetSpeedZ() * ZOOM_SPEED_SCALAR;
             var currentSize = Camera.main.orthographicSize;
@@ -242,6 +249,16 @@ public class InputManager : MonoBehaviour
         if (Physics.Raycast(ray.origin, ray.direction * 100, out hit))
         {
             obj = hit.collider.gameObject.GetComponent<RtsObject>();
+            
+            //We'll allow colliders to be in child objects.
+            if(obj == null)
+            {
+                var parent = hit.collider.gameObject.transform.parent;
+                if(parent != null)
+                {
+                    obj = parent.GetComponent<RtsObject>();
+                }
+            }
         }
         return obj;
     }

@@ -30,9 +30,14 @@ public class Formation
                 float randomRot = UnityEngine.Random.value;
                 float randomMag = UnityEngine.Random.value;
                 var rotation = 2 * Mathf.PI * randomRot;
+
+                //These formations are getting too damn big.  Temporarily keep them in line.
+                var clampedMagnitude = Mathf.Clamp(radius * RADIUS_MAGNITUDE_SCALAR, 1f, 40f);
+
                 var offset = new Vector3(
-                    Mathf.Cos(rotation) / 2f, 0f, 
-                    Mathf.Sin(rotation) / 2f) * radius * randomMag * RADIUS_MAGNITUDE_SCALAR;
+                    Mathf.Cos(rotation) / 2f, 
+                    0f, 
+                    Mathf.Sin(rotation) / 2f) * randomMag * clampedMagnitude;
                 
                 unit.PushState(new MovingState(destination + offset), isChaining);
             }

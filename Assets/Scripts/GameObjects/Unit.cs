@@ -3,9 +3,7 @@ using System.Collections.Generic;
 
 public class Unit : RtsObject
 {
-    public const float MaxVelocity = 5f;
-    public const float MaxAcceleration = 2f;
-    private const float FRICTION_COEFICIENT = 4f;
+    
     private readonly IUnitState _idleState = new IdlingState();
 
     public Stack<IUnitState> StateStack;
@@ -25,11 +23,33 @@ public class Unit : RtsObject
 
     public bool HasResource;
 
-    public Vector3 Acceleration;
-    public Vector3 Velocity0
+    public const float MaxVelocity = 5f;
+    public const float MaxAcceleration = 2f;
+    public const float FrictionCoefficient = 4f;
+
+
+    //I think these should be in some kind of data, not inheritance.
+    protected override float _maxVelocity
     {
-        get;
-        private set;
+        get
+        {
+            return MaxVelocity;
+        }
+    }
+    
+    protected override float _maxAcceleration
+    {
+        get
+        {
+            return MaxAcceleration;
+        }
+    }
+    protected override float _frictionCoefficient
+    {
+        get
+        {
+            return FrictionCoefficient;
+        }
     }
 
     protected override void Awake()
@@ -65,7 +85,7 @@ public class Unit : RtsObject
         }
         if (top != null && top.IsComplete)
         {
-            DebugStateLog.Add("State popped: " + top.GetType().Name);
+            //DebugStateLog.Add("State popped: " + top.GetType().Name);
             top.Exit(this);
             StateStack.Pop();
             
@@ -88,44 +108,6 @@ public class Unit : RtsObject
             _idleState.Update(this);
         }
     }
-
-    void LateUpdate()
-    {
-        Acceleration = Vector3.ClampMagnitude(Acceleration, MaxAcceleration);
-
-        //I think we need to do some friction here to make the unit at rest at really low speeds..
-        if (Velocity0.magnitude < 2f && Acceleration.magnitude < 0.01f)
-        {
-            var friction = -FRICTION_COEFICIENT * Velocity0;
-            Acceleration += friction;
-        }
-
-        var position0 = transform.position;
-        var positionDelta = 0.5f * Acceleration * (Time.deltaTime * Time.deltaTime)
-                             + Velocity0 * Time.deltaTime;
-        var position = position0 + positionDelta;
-
-        // Apply forces
-        transform.position = position;
-
-        // Bound the unit position to the map bounds.
-        //
-        // We need to bound velocity as well, so units don't get "caught" on the border of the map.
-        // or maybe we should just prevent this entirely through the selection mechanic.
-        // I'll just use this for now for testing so we don't get objects flying outside the camera
-        // bounds.
-        var bounds = Injector.Get<GameState>().MapBounds;
-        transform.position = new Vector3(Mathf.Clamp(transform.position.x, -bounds.x, bounds.x),
-                                         Mathf.Clamp(transform.position.y, -bounds.y, bounds.y),
-                                         Mathf.Clamp(transform.position.z, -bounds.z, bounds.z));
-
-        // Prepare for next frame
-        Velocity0 = Velocity0 + Acceleration * Time.deltaTime;
-        Velocity0 = Vector3.ClampMagnitude(Velocity0, MaxVelocity);
-
-        Acceleration = Vector3.zero;
-    }
-
 
     void OnTriggerEnter(Collider other)
     {
@@ -176,10 +158,10 @@ public class Unit : RtsObject
                 resource = Resources.Load<Material>(MATERIALS_PATH + "SwatchTealAlbedo");
                 break;
             case 3:
-                resource = Resources.Load<Material>(MATERIALS_PATH + "SwatchNavyAlbedo");
+                resource = Resources.Load<Material>(MATERIALS_PATH + "SwatchWhiteAlbedo");
                 break;
             case 4:
-                resource = Resources.Load<Material>(MATERIALS_PATH + "SwatchWhiteAlbedo");
+                resource = Resources.Load<Material>(MATERIALS_PATH + "SwatchNavyAlbedo");
                 break;
             default:
                 Debug.Log("This team doesn't have an associated color. " + teamNumber);
@@ -208,7 +190,7 @@ public class Unit : RtsObject
                 poppedState.Exit(this);
             }
         }
-        DebugStateLog.Add("State pushed, started:" + state.GetType().Name);
+        //DebugStateLog.Add("State pushed, started:" + state.GetType().Name);
         StateStack.Push(state);
         state.Enter(this);
     }

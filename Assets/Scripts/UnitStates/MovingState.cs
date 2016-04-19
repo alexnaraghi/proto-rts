@@ -8,7 +8,11 @@ public class MovingState : IUnitState
     private Vector3 _startPosition;
     
     Vector3 _destination;
-    
+
+    RtsObject _rtsObjectDestination;
+
+    bool isMovingToObject;
+
     public bool IsComplete
     {
         get;
@@ -18,6 +22,13 @@ public class MovingState : IUnitState
     public MovingState(Vector3 destination)
     {
         _destination = destination;
+        isMovingToObject = false;
+    }
+    
+    public MovingState(RtsObject rtsObject)
+    {
+        _rtsObjectDestination = rtsObject;
+        isMovingToObject = true;
     }
     
     public void Enter(Unit unit)
@@ -29,18 +40,26 @@ public class MovingState : IUnitState
     
     public void Update(Unit unit)
     {
+        var destination = isMovingToObject ? 
+            _rtsObjectDestination.transform.position
+            : _destination;
+            
         if(unit.Aggro != null && unit.Aggro.Target != null)
         {
             unit.PushState(new AttackingState(unit.Aggro.Target), true);
             return;
         }
         
-        var displacement = _destination - unit.transform.position;
+        var displacement = destination - unit.transform.position;
         var distance = displacement.magnitude;
-        
+
+        var relativeVelocity = isMovingToObject
+            ? unit.Velocity0 - _rtsObjectDestination.Velocity0
+            : unit.Velocity0;
+
         var direction = displacement.normalized;
-        var velocity0 = unit.Velocity0.magnitude;
-        var unitVelocity0 = unit.Velocity0.normalized;
+        var velocity0 = relativeVelocity.magnitude;
+        var unitVelocity0 = relativeVelocity.normalized;
 
         //var vectorWeDontWant = displacement - unit.Velocity0;
 
@@ -55,7 +74,7 @@ public class MovingState : IUnitState
         // If we are going way off from our destination, we need to dampen velocity and change course.
         if (trajectoryDot < 0.95f)
         {
-            var correctionAcceleration = -unit.Velocity0 * Unit.MaxAcceleration;
+            var correctionAcceleration = -relativeVelocity * Unit.MaxAcceleration;
         
             acceleration = correctionAcceleration;
         }
@@ -67,7 +86,7 @@ public class MovingState : IUnitState
         else
         {
             //As soon as we are slowed to a crawl, call it done.
-            if(distance < 1f && Vector3.Dot(unit.Velocity0, displacement) < 0 && velocity0 < 3f)
+            if(distance < 1f && Vector3.Dot(relativeVelocity, displacement) < 0 && velocity0 < 3f)
             {
                 IsComplete = true;
                 acceleration = Vector3.zero;

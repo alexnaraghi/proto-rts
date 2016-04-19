@@ -4,13 +4,49 @@ using UnityEngine;
 public class Mine : RtsObject
 {
     Base ClosestBase;
+
+    public float RotationRate = 3f;
+
+    float _radius;
+
+    protected override float _maxVelocity
+    {
+        get
+        {
+            return float.MaxValue;
+        }
+    }
+    
+    protected override float _maxAcceleration
+    {
+        get
+        {
+            return float.MaxValue;
+        }
+    }
+    
     // Use this for initialization
     protected override void Start()
     {
         base.Start();
+
+
         //Right now mines and bases don't move, so cache the closest one on startup.
         ClosestBase = FindClosestBase();
         Assert.IsTrue(ClosestBase != null);
+        
+        _radius = (ClosestBase.transform.position - transform.position).magnitude;
+
+        Assert.IsTrue(ClosestBase != null);
+    }
+    
+    void Update()
+    {
+        var displacementToOrbitCenter = ClosestBase.transform.position - transform.position;
+        var perpVectorUnit = Vector3.Cross(displacementToOrbitCenter, Vector3.up).normalized;
+        
+        Velocity0 = perpVectorUnit * RotationRate;
+        Acceleration = displacementToOrbitCenter.normalized * (RotationRate * RotationRate / _radius);
     }
 
     public override void OnTargeted(Unit targettingUnit, bool isChaining)

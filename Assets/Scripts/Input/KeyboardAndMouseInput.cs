@@ -2,6 +2,10 @@
 
 public class KeyboardAndMouseInput : RtsInput
 {
+    public override bool IsQuitting()
+    {
+        return Input.GetKeyDown(KeyCode.Q) && Input.GetKey(KeyCode.LeftControl);
+    }
     public override bool IsSelectionStarted()
     {
         return Input.GetMouseButtonDown(0);

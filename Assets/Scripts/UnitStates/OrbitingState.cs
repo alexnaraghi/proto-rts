@@ -3,7 +3,6 @@
 public class OrbitingState : IUnitState
 {
     private const float DESIRED_ORBIT_VELOCITY = 2.5f;
-    private readonly Vector3 UP = new Vector3(0, 1, 0);
 
     private  RtsObject _orbitObject;
     private float _orbitRadius;
@@ -11,18 +10,32 @@ public class OrbitingState : IUnitState
     //Some randomized variables so our orbits aren't completely uniform
     private float _personalDesiredVelocity;
     private float _personalRadius;
+    
+    
+    private float _timoutSeconds;
+    private bool _hasTimeout;
+
+    private float _timerSeconds;
 
     public bool IsComplete
     {
         get
         {
-            return false;
+            return _hasTimeout && _timerSeconds >= _timoutSeconds;
         }
     }
     public OrbitingState(RtsObject orbitObject, float orbitRadius)
     {
         _orbitObject = orbitObject;
         _orbitRadius = orbitRadius;
+    }
+    
+    // We can also just orbit for a certain amount of time and stop.
+    public OrbitingState(RtsObject orbitObject, float orbitRadius, float timeoutSeconds)
+        : this(orbitObject, orbitRadius)
+    {
+        _hasTimeout = true;
+        _timoutSeconds = timeoutSeconds;
     }
     
     public void Enter(Unit unit)
@@ -49,7 +62,7 @@ public class OrbitingState : IUnitState
             displacementToOrbitCenter = new Vector3(0, 0, 1);
         }
         
-        var perpVec = Vector3.Cross(displacementToOrbitCenter, UP);
+        var perpVec = Vector3.Cross(displacementToOrbitCenter, Vector3.up);
         var tangentPoint = _orbitObject.transform.position + perpVec.normalized * _personalRadius;
 
         var velocity0 = unit.Velocity0.magnitude;
@@ -57,7 +70,7 @@ public class OrbitingState : IUnitState
         Vector3 acceleration = Vector3.zero;
         
         // Don't go too fast to orbit
-        if(velocity0 > DESIRED_ORBIT_VELOCITY)
+        if(velocity0 > _personalDesiredVelocity)
         {
             acceleration += -unit.Velocity0;
         }
@@ -70,6 +83,8 @@ public class OrbitingState : IUnitState
         acceleration += direction * accelerationMagnitude;
 
         unit.Acceleration = acceleration;
+
+        _timerSeconds += Time.deltaTime;
     }
     
     public void Exit(Unit unit)

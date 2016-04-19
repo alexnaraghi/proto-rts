@@ -4,16 +4,18 @@ using UnityEngine;
 
 public class Base : RtsObject
 {
-    private const float ORBIT_RADIUS = 25f;
+    public const float ORBIT_RADIUS = 25f;
     public Unit ProductionUnitPrefab;
     
     public List<Unit> OrbitingObjects;
+
+    //public Unit UnitInside;
     
     public int Resource;
     
     public bool isProducing;
-    
-    const float UNIT_PRODUCTION_SECONDS = 2f;
+
+    const float UNIT_PRODUCTION_SECONDS = 0.2f;
     
     private float _productionSeconds;
     
@@ -59,6 +61,16 @@ public class Base : RtsObject
     {
         Resource += resourceCount;
     }
+    
+    public bool CanAddResource()
+    {
+        return Resource < 1;
+    }
+
+    // public bool IsUnitInside()
+    // {
+    //     return UnitInside != null;
+    // }
 
     private void CompleteUnit()
     {
