@@ -108,70 +108,12 @@ public class Unit : RtsObject
             _idleState.Update(this);
         }
     }
-
-    void OnTriggerEnter(Collider other)
-    {
-        /*
-        UnitsInRange.Add(other.gameObject);
-
-        if (CurrentState != IUnitState.Fighting)
-        {
-            var otherUnit = other.GetComponent<Unit>();
-            if (otherUnit != null && otherUnit.IsAlive && otherUnit.IsAttackable && otherUnit.Team != Team)
-            {
-                CurrentState = IUnitState.Fighting;
-            }
-        }
-        */
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        /*
-        UnitsInRange.Remove(other.gameObject);
-
-        if (other.gameObject == Target)
-        {
-            Target = null;
-        }*/
-
-    }
     
     public bool HasAggro
     {
         get
         {
             return UnitsInRange.Count > 0;
-        }
-    }
-
-    public void SetTeamColor(int teamNumber)
-    {
-        const string MATERIALS_PATH = "Materials/";
-        Material resource = null;
-        switch (teamNumber)
-        {
-            case 1:
-                resource = Resources.Load<Material>(MATERIALS_PATH + "SwatchPinkDAlbedo");
-                break;
-            case 2:
-                resource = Resources.Load<Material>(MATERIALS_PATH + "SwatchTealAlbedo");
-                break;
-            case 3:
-                resource = Resources.Load<Material>(MATERIALS_PATH + "SwatchWhiteAlbedo");
-                break;
-            case 4:
-                resource = Resources.Load<Material>(MATERIALS_PATH + "SwatchNavyAlbedo");
-                break;
-            default:
-                Debug.Log("This team doesn't have an associated color. " + teamNumber);
-                break;
-
-        }
-        var renderer = GetComponent<Renderer>();
-        if (renderer != null)
-        {
-            renderer.material = resource;
         }
     }
 

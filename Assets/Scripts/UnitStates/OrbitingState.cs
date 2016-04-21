@@ -40,6 +40,7 @@ public class OrbitingState : IUnitState
     
     public void Enter(Unit unit)
     {
+        (_orbitObject as Base).OrbitingObjects.Add(unit);
         _personalDesiredVelocity = DESIRED_ORBIT_VELOCITY * Random.Range(0.8f, 1.2f);
         _personalRadius = _orbitRadius * Random.Range(0.8f, 1.2f);
     }
@@ -89,5 +90,6 @@ public class OrbitingState : IUnitState
     
     public void Exit(Unit unit)
     {
+        (_orbitObject as Base).OrbitingObjects.Remove(unit);        
     }
 }

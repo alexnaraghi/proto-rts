@@ -9,6 +9,8 @@ public class Mine : RtsObject
 
     float _radius;
 
+    private Unit _gatheringUnit;
+
     protected override float _maxVelocity
     {
         get
@@ -57,7 +59,6 @@ public class Mine : RtsObject
         }
     }
 
-
     private Base FindClosestBase()
     {
         Base closest = null;
@@ -80,5 +81,31 @@ public class Mine : RtsObject
             }
         }
         return closest;
+    }
+    
+    public bool IsAvailable
+    {
+        get {
+            return _gatheringUnit == null;
+        }
+    }
+    
+    public void BeginMining(Unit unit)
+    {
+        Assert.IsNull(_gatheringUnit);
+        _gatheringUnit = unit;
+    }
+    
+    public void EndMining(Unit unit)
+    {
+        Assert.IsNotNull(_gatheringUnit);
+        if (unit == _gatheringUnit)
+        {
+            _gatheringUnit = null;
+        }
+        else
+        {
+            Debug.LogWarning("Unit declared that it ended mining, but wasn't mining...");
+        }
     }
 }

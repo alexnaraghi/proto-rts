@@ -22,10 +22,8 @@ public class MiningState : IUnitState
 
     public bool IsComplete
     {
-        get
-        {
-            return false;
-        }
+        get;
+        private set;
     }
 
     public MiningState(Base pBase, Mine mine)
@@ -41,6 +39,12 @@ public class MiningState : IUnitState
 
     public void Update(Unit unit)
     {
+        if(Base.Team != unit.Team)
+        {
+            IsComplete = true;
+            return;
+        }
+        
         if (unit.Aggro != null && unit.Aggro.Target != null)
         {
             unit.PushState(new AttackingState(unit.Aggro.Target), true);
@@ -50,30 +54,10 @@ public class MiningState : IUnitState
         //Delegate out a sub-action for mining.
         if (unit.HasResource)
         {
-           // if (IsInsideBase(unit) && !Base.IsUnitInside())
             if (IsInsideBase(unit))
             {
-                //TODO: Make a state for collecting a resource
-                Base.AddResource(1);
-                unit.HasResource = false;
+                unit.PushState(new UnloadingState(Base), true);
             }
-            // else if (IsNearBase(unit))
-            // {
-            //     if (!Base.IsUnitInside())
-            //     {
-            //         unit.PushState(new MovingState(Base.transform.position), true);
-            //         Base.UnitInside = unit;
-            //     }
-            //     else
-            //     {
-            //         unit.PushState(new OrbitingState(unit, Base.ORBIT_RADIUS, 2f));
-            //     }
-            // }
-            // else
-            // {
-            //     var insideBaseRange = ClosestPointToBaseOrbit(unit);
-            //     unit.PushState(new MovingState(insideBaseRange), true);
-            // }
             else
             {
                 unit.PushState(new MovingState(Base), true);
@@ -81,19 +65,9 @@ public class MiningState : IUnitState
         }
         else
         {
-            // if (Base.IsUnitInside() && Base.UnitInside.Id == unit.Id)
-            // {
-            //     Base.UnitInside = null;
-            // }
-            // else if (IsInsideMine(unit))
-            // {
-            //     //TODO: Make a state for collecting a resource
-            //     unit.HasResource = true;
-            // }
             if (IsInsideMine(unit))
             {
-                //TODO: Make a state for collecting a resource
-                unit.HasResource = true;
+                unit.PushState(new GatheringState(Mine), true);
             }
             else
             {

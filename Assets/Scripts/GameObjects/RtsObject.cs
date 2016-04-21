@@ -62,11 +62,12 @@ public class RtsObject : MonoBehaviour
             Acceleration = Vector3.ClampMagnitude(Acceleration, _maxAcceleration);
 
             //I think we need to do some friction here to make the unit at rest at really low speeds..
+            /*
             if (Velocity0.magnitude < 2f && Acceleration.magnitude < 0.01f)
             {
                 var friction = -_frictionCoefficient * Velocity0;
                 Acceleration += friction;
-            }
+            }*/
 
             var position0 = transform.position;
             var positionDelta = 0.5f * Acceleration * (Time.deltaTime * Time.deltaTime)
@@ -116,5 +117,40 @@ public class RtsObject : MonoBehaviour
         }
         
         return true;
+    }
+
+    public void SetTeamColor(int teamNumber)
+    {
+        const string MATERIALS_PATH = "Materials/";
+        Material resource = null;
+        switch (teamNumber)
+        {
+            case 1:
+                resource = Resources.Load<Material>(MATERIALS_PATH + "SwatchPinkDAlbedo");
+                break;
+            case 2:
+                resource = Resources.Load<Material>(MATERIALS_PATH + "SwatchTealAlbedo");
+                break;
+            case 3:
+                resource = Resources.Load<Material>(MATERIALS_PATH + "SwatchWhiteAlbedo");
+                break;
+            case 4:
+                resource = Resources.Load<Material>(MATERIALS_PATH + "SwatchNavyAlbedo");
+                break;
+            default:
+                Debug.Log("This team doesn't have an associated color. " + teamNumber);
+                break;
+
+        }
+        var renderer = GetComponent<Renderer>();
+        if (renderer == null)
+        {
+            renderer = GetComponentInChildren<Renderer>();
+        }
+        
+        if(renderer != null)
+        {
+            renderer.material = resource;
+        }
     }
 }

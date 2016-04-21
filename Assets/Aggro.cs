@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class Aggro : MonoBehaviour 
 {
-	public List<Aggro> AggroInRange;
+	public LinkedList<Aggro> AggroInRange;
 
     public RtsObject AttachedParent;
 
@@ -20,11 +20,11 @@ public class Aggro : MonoBehaviour
             }
 
             RtsObject target = null;			
-            for(int i = 0; i < AggroInRange.Count; i++)
+            foreach(var item in AggroInRange)
 			{
-				if(AggroInRange[i].AttachedParent.Team != myTeam)
+				if(item.AttachedParent.Team != myTeam)
 				{
-                    target = AggroInRange[i].AttachedParent;
+                    target = item.AttachedParent;
                     break;
                 }
 			}
@@ -35,23 +35,25 @@ public class Aggro : MonoBehaviour
 	
 	void Update()
 	{
-		// Hmmmmmmm is there a better way to clean the aggro list out or is this
-		// good enough.
-		for(int i = 0; i < AggroInRange.Count; i++)
-		{
-			if(AggroInRange[i] == null 
-				|| AggroInRange[i].AttachedParent == null 
-				|| !AggroInRange[i].AttachedParent.IsAlive)
-			{
-                AggroInRange.RemoveAt(i);
-                i--;
+        // Hmmmmmmm is there a better way to clean the aggro list out or is this
+        // good enough.
+        var node = AggroInRange.First;
+        while(node != null)
+        {
+            var next = node.Next;
+            if(node.Value == null 
+                || node.Value.AttachedParent == null 
+                || !node.Value.AttachedParent.IsAlive)
+            {
+                AggroInRange.Remove(node);
             }
-		}
+            node = next;
+        }
 	}
 
     void Awake()
 	{
-        AggroInRange = new List<Aggro>();
+        AggroInRange = new LinkedList<Aggro>();
         Assert.IsTrue(AttachedParent != null);
     }
 	
@@ -61,7 +63,8 @@ public class Aggro : MonoBehaviour
 
         if (otherAggro != null)
         {
-            AggroInRange.Add(otherAggro);
+            //Warning: very ineficient
+            AggroInRange.AddLast(otherAggro);
         }
     }
 
@@ -71,6 +74,7 @@ public class Aggro : MonoBehaviour
 
         if (otherAggro != null)
         {
+            //Warning: very ineficient            
             AggroInRange.Remove(otherAggro);
         }
     }

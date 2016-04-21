@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.Assertions;
+using UnityEngine.SceneManagement;
 
 public class GameState : MonoBehaviour
 {
@@ -11,6 +12,12 @@ public class GameState : MonoBehaviour
     public List<RtsObject> ObjectsToDestroy;
     
     public int LocalTeam;
+    
+    public int TeamCount
+    {
+        get;
+        private set;
+    }
 
     // The map's bounding rectangle in units, represented as the half-width,length,height
     public Vector3 MapBounds = new Vector3(150, 80, 80);
@@ -23,7 +30,8 @@ public class GameState : MonoBehaviour
         
         //TODO: Team selection or something
         LocalTeam = 1;
-        
+        TeamCount = 2;
+
         Populate();
     }
     
@@ -34,6 +42,13 @@ public class GameState : MonoBehaviour
             Destroy(ObjectsToDestroy[i].gameObject);
         }
         ObjectsToDestroy.Clear();
+
+        var info = CheckVictoryConditions();
+        if(info.IsOver)
+        {
+            //TODO: game over stuff
+            LeanTween.delayedCall(1f, ()=> SceneManager.LoadScene("GameOver"));
+        }
     }
     
     //Temporary, until we have level files
@@ -75,4 +90,41 @@ public class GameState : MonoBehaviour
             ObjectsToDestroy.Add(foundUnit);
         }
     }
+    
+    private VictoryInfo CheckVictoryConditions()
+    {
+        VictoryInfo info = default(VictoryInfo);
+        
+        // See if all the bases are owned by a single team.
+        int team = -1;
+        bool isUnanimous = true;
+        foreach(var o in RtsObjects.Values)
+        {
+            if (o is Base)
+            {
+                if (team == -1)
+                {
+                    team = o.Team;
+                }
+                else if(team != o.Team)
+                {
+                    isUnanimous = false;
+                    break;
+                }
+            }
+        }
+        
+        if(team > 0 && isUnanimous)
+        {
+            info = new VictoryInfo() { IsOver = true, Team = team };
+        }
+
+        return info;
+    }
+}
+
+struct VictoryInfo
+{
+    public bool IsOver;
+    public int Team;
 }
