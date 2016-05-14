@@ -2,12 +2,21 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine.Assertions;
+using System.Linq;
 
 [System.Serializable]
 public class SelectCommand : Command 
 {
     public HashSet<int> PreviousSelections;
     public RtsObject[] Selections;
+    
+    public int[] SelectionsAsIds
+    {
+        get
+        {
+            return Selections.Select(u => u.Id).ToArray();
+        }
+    }
     
     public SelectCommand(int teamNumber, RtsObject[] selections)
     {

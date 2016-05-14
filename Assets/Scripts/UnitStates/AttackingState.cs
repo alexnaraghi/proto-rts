@@ -21,7 +21,7 @@ public class AttackingState : IUnitState
         Debug.Log("Unit is attacking");
     }
     
-    public void Update(Unit unit)
+    public void Update(Unit unit, float deltaSeconds)
     {
         //Decision: once a unit decides to attack, there's no turning back.
         

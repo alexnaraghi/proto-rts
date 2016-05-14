@@ -22,7 +22,7 @@ public class IdlingState : IUnitState
         _pivotPosition = unit.transform.position;
     }
 
-    public void Update(Unit unit)
+    public void Update(Unit unit, float deltaSeconds)
     {
         if(unit.Aggro != null && unit.Aggro.Target != null)
         {
@@ -30,7 +30,7 @@ public class IdlingState : IUnitState
             return;
         }
         
-        var randomAcceleration = Random.Range(0, IDLING_ACCELERATION);
+        var randomAcceleration = RtsRandom.Range(0, IDLING_ACCELERATION);
 
         var acceleration = Vector3.zero;
 

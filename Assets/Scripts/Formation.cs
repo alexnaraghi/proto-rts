@@ -27,8 +27,8 @@ public class Formation
             //TODO: Make this deterministic.
             foreach(var unit in units)
             {
-                float randomRot = UnityEngine.Random.value;
-                float randomMag = UnityEngine.Random.value;
+                float randomRot = RtsRandom.Value;
+                float randomMag = RtsRandom.Value;
                 var rotation = 2 * Mathf.PI * randomRot;
 
                 //These formations are getting too damn big.  Temporarily keep them in line.

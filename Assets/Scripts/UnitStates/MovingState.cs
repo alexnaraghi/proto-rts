@@ -38,7 +38,7 @@ public class MovingState : IUnitState
         //_timeToArrive = (_destination - _startPosition).magnitude / MAX_VELOCITY;
     }
     
-    public void Update(Unit unit)
+    public void Update(Unit unit, float deltaSeconds)
     {
         var destination = isMovingToObject ? 
             _rtsObjectDestination.transform.position

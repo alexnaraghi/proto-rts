@@ -35,7 +35,7 @@ public class GameState : MonoBehaviour
         Populate();
     }
     
-    void Update()
+    public void GameUpdate(float deltaSeconds)
     {
         for(int i = 0; i < ObjectsToDestroy.Count; i++)
         {
@@ -89,6 +89,17 @@ public class GameState : MonoBehaviour
             foundUnit.IsAlive = false;
             ObjectsToDestroy.Add(foundUnit);
         }
+    }
+    
+    public RtsObject[] FromIds(int[] unitIds)
+    {
+        var units = new RtsObject[unitIds.Length];
+        for(int i = 0; i < unitIds.Length; i++)
+        {
+            Assert.IsTrue(RtsObjects.ContainsKey(i));
+            units[i] = RtsObjects[unitIds[i]];
+        }
+        return units;
     }
     
     private VictoryInfo CheckVictoryConditions()

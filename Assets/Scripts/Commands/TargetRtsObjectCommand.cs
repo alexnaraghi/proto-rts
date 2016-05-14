@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Linq;
 
 [System.Serializable]
 public class TargetRtsObjectCommand : Command 
@@ -8,6 +9,14 @@ public class TargetRtsObjectCommand : Command
     public RtsObject Target;
     
     public bool IsChaining;
+    
+    public int[] AttackersAsIds
+    {
+        get
+        {
+            return Attackers.Select(u => u.Id).ToArray();
+        }
+    }
     
     public TargetRtsObjectCommand(int teamNumber, Unit[] attackers, RtsObject target, bool isChaining)
     {

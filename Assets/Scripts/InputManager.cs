@@ -94,13 +94,13 @@ public class InputManager : MonoBehaviour
                         objUnderCursor.transform.position.z));
 
                     var command = new TargetRtsObjectCommand(team, units, objUnderCursor, isChaining: false);
-                    Injector.Get<CommandManager>().QueueCommand(command);
+                    Injector.Get<CommandManager>().QueueLocalCommand(command);
                 }
                 else
                 {
                     var destination = ConvertToWorld(cursorPosition);
                     var command = new TargetPositionCommand(team, units, destination, isChaining: false);
-                    Injector.Get<CommandManager>().QueueCommand(command);
+                    Injector.Get<CommandManager>().QueueLocalCommand(command);
                 }
             }
         }
@@ -121,7 +121,7 @@ public class InputManager : MonoBehaviour
                 var selectionArray = _selectionCache.ToArray();
                 var localTeam = Injector.Get<GameState>().LocalTeam;
                 var command = new SelectCommand(localTeam, selectionArray);
-                Injector.Get<CommandManager>().QueueCommand(command);
+                Injector.Get<CommandManager>().QueueLocalCommand(command);
             }
 
             if (Image != null)
@@ -136,7 +136,7 @@ public class InputManager : MonoBehaviour
             _selectionStart = _input.GetSelectionPosition();
 
             var localTeam = Injector.Get<GameState>().LocalTeam;
-            Injector.Get<CommandManager>().QueueCommand(new UnselectAllCommand(localTeam));
+            Injector.Get<CommandManager>().QueueLocalCommand(new UnselectAllCommand(localTeam));
 
             if (Image != null)
             {

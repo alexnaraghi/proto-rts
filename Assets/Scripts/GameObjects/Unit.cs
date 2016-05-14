@@ -71,7 +71,7 @@ public class Unit : RtsObject
         _idleState.Enter(this);
     }
 
-    void Update()
+    public override void GameUpdate(float deltaSeconds)
     {
         if(!IsAlive)
         {
@@ -101,11 +101,11 @@ public class Unit : RtsObject
 
         if (top != null)
         {
-            top.Update(this);
+            top.Update(this, deltaSeconds);
         }
         else
         {
-            _idleState.Update(this);
+            _idleState.Update(this, deltaSeconds);
         }
     }
     

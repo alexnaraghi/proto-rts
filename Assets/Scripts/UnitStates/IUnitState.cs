@@ -5,7 +5,7 @@
         get;
      }
     void Enter(Unit unit);
-    void Update(Unit unit);
+    void Update(Unit unit, float deltaSeconds);
     void Exit(Unit unit);
 }
 

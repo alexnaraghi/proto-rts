@@ -37,7 +37,7 @@ public class MiningState : IUnitState
         //Everything is handled in the update loop.
     }
 
-    public void Update(Unit unit)
+    public void Update(Unit unit, float deltaSeconds)
     {
         if(Base.Team != unit.Team)
         {

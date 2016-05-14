@@ -43,8 +43,9 @@ public class Base : RtsObject
         Assert.IsTrue(ProductionUnitPrefab != null);
     }
     
-    void Update()
+    public override void GameUpdate(float deltaSeconds)
     {
+
         if (!isProducing && Resource > 0)
         {
             Resource--;
@@ -61,7 +62,7 @@ public class Base : RtsObject
             }
             else
             {
-                _productionSeconds += Time.deltaTime;
+                _productionSeconds += deltaSeconds;
             }
         }
 
@@ -122,11 +123,11 @@ public class Base : RtsObject
                     // uncontested.
                     if(!isOwned || hasOwnerUnit)
                     {
-                        _ownershipPercent += CAPTURE_PERCENT_PER_UNIT_PER_SECOND * 0.01f * Time.deltaTime;
+                        _ownershipPercent += CAPTURE_PERCENT_PER_UNIT_PER_SECOND * 0.01f * deltaSeconds;
                     }
                     else
                     {
-                        _ownershipPercent += CAPTURE_PERCENT_PER_UNIT_PER_SECOND * 0.01f * Time.deltaTime;                        
+                        _ownershipPercent += CAPTURE_PERCENT_PER_UNIT_PER_SECOND * 0.01f * deltaSeconds;                        
                     }
                     
                     if(_ownershipPercent <= 0f)

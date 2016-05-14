@@ -37,7 +37,7 @@ public class GatheringState : IUnitState
         }
     }
 
-    public void Update(Unit unit)
+    public void Update(Unit unit, float deltaSeconds)
     {
 		// A little hacky, just lock the unit inside the mine while it's in this state.
 		// Currently I can't see a scenario where this would cause issues, so don't overcomplicate.
@@ -69,7 +69,7 @@ public class GatheringState : IUnitState
                 unit.HasResource = true;
                 IsComplete = true;
             }
-            _timer += Time.deltaTime;
+            _timer += deltaSeconds;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Linq;
 
 [System.Serializable]
 public class TargetPositionCommand : Command
@@ -8,6 +9,14 @@ public class TargetPositionCommand : Command
     public Vector3 Destination;
     
     public bool IsChaining;
+    
+    public int[] AttackersAsIds
+    {
+        get
+        {
+            return Attackers.Select(u => u.Id).ToArray();
+        }
+    }
     
     public TargetPositionCommand(int teamNumber, Unit[] attackers, Vector3 destination, bool isChaining)
     {

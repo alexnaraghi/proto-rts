@@ -41,11 +41,11 @@ public class OrbitingState : IUnitState
     public void Enter(Unit unit)
     {
         (_orbitObject as Base).OrbitingObjects.Add(unit);
-        _personalDesiredVelocity = DESIRED_ORBIT_VELOCITY * Random.Range(0.8f, 1.2f);
-        _personalRadius = _orbitRadius * Random.Range(0.8f, 1.2f);
+        _personalDesiredVelocity = DESIRED_ORBIT_VELOCITY * RtsRandom.Range(0.8f, 1.2f);
+        _personalRadius = _orbitRadius * RtsRandom.Range(0.8f, 1.2f);
     }
     
-    public void Update(Unit unit)
+    public void Update(Unit unit, float deltaSeconds)
     {
         if(unit.Aggro != null && unit.Aggro.Target != null)
         {
@@ -85,7 +85,7 @@ public class OrbitingState : IUnitState
 
         unit.Acceleration = acceleration;
 
-        _timerSeconds += Time.deltaTime;
+        _timerSeconds += deltaSeconds;
     }
     
     public void Exit(Unit unit)

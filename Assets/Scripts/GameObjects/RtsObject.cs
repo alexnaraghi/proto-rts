@@ -55,7 +55,12 @@ public class RtsObject : MonoBehaviour
         IsAlive = true;
     }
     
-    protected virtual void LateUpdate()
+    public virtual void GameUpdate(float deltaSeconds)
+    {
+        
+    }    
+    
+    public virtual void LateGameUpdate(float deltaSeconds)
     {
         if (_maxVelocity > float.Epsilon)
         {
@@ -70,8 +75,8 @@ public class RtsObject : MonoBehaviour
             }*/
 
             var position0 = transform.position;
-            var positionDelta = 0.5f * Acceleration * (Time.deltaTime * Time.deltaTime)
-                                 + Velocity0 * Time.deltaTime;
+            var positionDelta = 0.5f * Acceleration * (deltaSeconds)
+                                 + Velocity0 * deltaSeconds;
             var position = position0 + positionDelta;
 
             // Apply forces
@@ -89,7 +94,7 @@ public class RtsObject : MonoBehaviour
                                              Mathf.Clamp(transform.position.z, -bounds.z, bounds.z));
 
             // Prepare for next frame
-            Velocity0 = Velocity0 + Acceleration * Time.deltaTime;
+            Velocity0 = Velocity0 + Acceleration * deltaSeconds;
             Velocity0 = Vector3.ClampMagnitude(Velocity0, _maxVelocity);
 
             Acceleration = Vector3.zero;

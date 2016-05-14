@@ -42,7 +42,7 @@ public class Mine : RtsObject
         Assert.IsTrue(ClosestBase != null);
     }
     
-    void Update()
+    public override void GameUpdate(float deltaSeconds)
     {
         var displacementToOrbitCenter = ClosestBase.transform.position - transform.position;
         var perpVectorUnit = Vector3.Cross(displacementToOrbitCenter, Vector3.up).normalized;
