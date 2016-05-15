@@ -15,6 +15,24 @@ namespace Prototype.NetworkLobby
         public InputField ipInput;
         public InputField matchNameInput;
 
+        public CanvasGroup MatchmakingCanvasGroup;
+        public Text MatchmakingDisabledText;
+        
+        void Awake()
+        {
+#if UNITY_WEBGL
+            if(MatchmakingCanvasGroup != null)
+            {
+                MatchmakingCanvasGroup.alpha = 0.5f;
+                MatchmakingCanvasGroup.interactable = false;
+            }
+            if(MatchmakingDisabledText != null)
+            {
+                MatchmakingDisabledText.gameObject.SetActive(true);
+            }
+#endif
+        }
+
         public void OnEnable()
         {
             lobbyManager.topPanel.ToggleVisibility(true);

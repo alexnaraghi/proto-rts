@@ -31,3 +31,5 @@ player_win_x86_s.pdb
 Assets/Scripts/Config.cs
 Assets/Scripts/Config.cs.meta
 *.pdb
+proto/
+web gl/
