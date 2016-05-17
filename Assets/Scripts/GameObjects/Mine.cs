@@ -45,9 +45,10 @@ public class Mine : RtsObject
     {
         var displacementToOrbitCenter = ClosestBase.transform.position - transform.position;
         var perpVectorUnit = Vector3.Cross(displacementToOrbitCenter, Vector3.up).normalized;
+        var accelerationMagnitude = RotationRate * RotationRate * deltaSeconds / _radius;
         
         Velocity0 = perpVectorUnit * RotationRate;
-        Acceleration = displacementToOrbitCenter.normalized * (RotationRate * RotationRate / _radius);
+        Acceleration = displacementToOrbitCenter.normalized * accelerationMagnitude;
     }
 
     public override void OnTargeted(Unit targettingUnit, bool isChaining)
