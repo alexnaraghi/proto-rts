@@ -44,23 +44,33 @@ public class RtsNetworkPlayer : NetworkBehaviour, IPlayer
         }
 	}
 	
-	public Command[] GetCommandsForLockstep(int lockStep)
+    // Removes and returns the commands for this lockstep.
+	public Command[] RemoveCommandsForLockstep(int lockStep)
 	{
         var commands = new List<Command>();
-		foreach(var netCommand in CommandList)
+
+        var current = CommandList.First;
+
+        while(current != null)
 		{
-			if(netCommand.LockStep == lockStep)
+            var next = current.Next;
+
+            if(current.Value.LockStep == lockStep)
 			{
-                commands.Add(netCommand.Command);
+                commands.Add(current.Value.Command);
+                CommandList.Remove(current);
             }
-		}
+
+            current = next;
+        }
 
         return commands.ToArray();
     }
 
 	public bool IsReadyForLockstep(int lockStep)
 	{
-        return true;
+        // TODO: Cache this result so we don't have to generate this twice.
+        return RemoveCommandsForLockstep(lockStep).Length > 0;
     }
 	
 	public void SendCommand(Command command)
@@ -149,7 +159,7 @@ public class RtsNetworkPlayer : NetworkBehaviour, IPlayer
 	{
         var units = Injector.Get<GameState>().FromIds(unitIds);
         var cmd = new NetUnitCommand(lockStep, new SelectCommand(teamNumber, units));
-        CommandList.Add(cmd);
+        CommandList.AddLast(cmd);
 	}
 
 	[ClientRpc]
@@ -158,7 +168,7 @@ public class RtsNetworkPlayer : NetworkBehaviour, IPlayer
 	{
         var attackers = Injector.Get<GameState>().FromIds(attackerIds).Select(u => u as Unit).ToArray();
         var cmd = new NetUnitCommand(lockStep, new TargetPositionCommand(teamNumber, attackers, destination, isChaining));
-        CommandList.Add(cmd);
+        CommandList.AddLast(cmd);
 	}
 	
 	[ClientRpc]
@@ -181,8 +191,8 @@ public class RtsNetworkPlayer : NetworkBehaviour, IPlayer
         }
         var cmd = new NetUnitCommand(lockStep, 
 			new TargetRtsObjectCommand(teamNumber, attackers, target, isChaining));
-        
-		CommandList.Add(cmd);
+
+        CommandList.AddLast(cmd);
 	}
 	
 	
@@ -192,7 +202,7 @@ public class RtsNetworkPlayer : NetworkBehaviour, IPlayer
         var cmd = new NetUnitCommand(lockStep, 
 			new UnselectAllCommand(teamNumber));
         
-		CommandList.Add(cmd);
+        CommandList.AddLast(cmd);
 	}
 #endregion
 }

@@ -32,8 +32,7 @@ public class Mine : RtsObject
     {
         base.Start();
 
-
-        //Right now mines and bases don't move, so cache the closest one on startup.
+        //Right now bases don't move, so cache the closest one on startup.
         ClosestBase = FindClosestBase();
         Assert.IsTrue(ClosestBase != null);
         

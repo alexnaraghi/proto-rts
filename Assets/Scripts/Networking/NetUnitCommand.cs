@@ -12,4 +12,4 @@ public struct NetUnitCommand
     }
 }
 
-public class NetCommandList : List<NetUnitCommand>{ }
+public class NetCommandList : LinkedList<NetUnitCommand>{ }

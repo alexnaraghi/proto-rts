@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class CommandManager : MonoBehaviour 
 {
@@ -66,30 +67,28 @@ public class CommandManager : MonoBehaviour
                 _frame++;
             }
         }
-        //else
+        
+        // We can't use an enumerable here because new units can be created during the 
+        // foreach.
+        var rtsObjects = Injector.Get<GameState>().RtsObjects.Values.ToArray();
+        
+        //update the game
+        foreach(var obj in rtsObjects)
         {
-            var rtsObjects = Injector.Get<GameState>().RtsObjects.Values;
-            
-            //update the game
-            foreach(var obj in rtsObjects)
-            {
-                obj.GameUpdate(_frameSeconds);
-            }
-            
-            rtsObjects = Injector.Get<GameState>().RtsObjects.Values;
-            
-            foreach(var obj in rtsObjects)
-            {
-                obj.LateGameUpdate(_frameSeconds);
-            }
+            obj.GameUpdate(_frameSeconds);
+        }
+        
+        foreach(var obj in rtsObjects)
+        {
+            obj.LateGameUpdate(_frameSeconds);
+        }
 
-            Injector.Get<GameState>().GameUpdate(_frameSeconds);
+        Injector.Get<GameState>().GameUpdate(_frameSeconds);
 
-            _frame++;
-            if(_frame == _gameFramesPerLockStepTurn)
-            {
-                _frame = 0;
-            }
+        _frame++;
+        if(_frame == _gameFramesPerLockStepTurn)
+        {
+            _frame = 0;
         }
     }
     
@@ -112,7 +111,7 @@ public class CommandManager : MonoBehaviour
     {
         for (int i = 0; i < _players.Count; i++)
         {
-            var commands = _players[i].GetCommandsForLockstep(LockStep);
+            var commands = _players[i].RemoveCommandsForLockstep(LockStep);
             foreach(var command in commands)
             {
                 command.Execute();
@@ -125,5 +124,5 @@ public interface IPlayer
 {
     bool IsReadyForLockstep(int lockStep);
 
-    Command[] GetCommandsForLockstep(int lockStep);
+    Command[] RemoveCommandsForLockstep(int lockStep);
 }

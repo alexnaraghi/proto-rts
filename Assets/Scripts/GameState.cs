@@ -39,6 +39,7 @@ public class GameState : MonoBehaviour
     {
         for(int i = 0; i < ObjectsToDestroy.Count; i++)
         {
+            SelectedObjectIds.Remove(ObjectsToDestroy[i].Id);
             Destroy(ObjectsToDestroy[i].gameObject);
         }
         ObjectsToDestroy.Clear();
@@ -84,7 +85,6 @@ public class GameState : MonoBehaviour
         if(RtsObjects.ContainsKey(id))
         {
             var foundUnit = RtsObjects[id];
-            SelectedObjectIds.Remove(id);
             RtsObjects.Remove(id);
             foundUnit.IsAlive = false;
             ObjectsToDestroy.Add(foundUnit);
