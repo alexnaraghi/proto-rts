@@ -12,4 +12,14 @@ public struct NetUnitCommand
     }
 }
 
+public struct Confirmation
+{
+    public int LockStep;
+
+    public Confirmation(int lockStep)
+	{
+        LockStep = lockStep;
+    }
+}
+
 public class NetCommandList : LinkedList<NetUnitCommand>{ }

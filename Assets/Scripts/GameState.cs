@@ -24,6 +24,8 @@ public class GameState : MonoBehaviour
 
     void Awake()
     {
+        RtsRandom.Seed = 0;
+        
         ObjectsToDestroy = new List<RtsObject>();
         SelectedObjectIds = new HashSet<int>();
         RtsObjects = new Dictionary<int, RtsObject>();
@@ -39,7 +41,9 @@ public class GameState : MonoBehaviour
     {
         for(int i = 0; i < ObjectsToDestroy.Count; i++)
         {
-            SelectedObjectIds.Remove(ObjectsToDestroy[i].Id);
+            var id = ObjectsToDestroy[i].Id;
+            RtsObjects.Remove(id);
+            SelectedObjectIds.Remove(id);
             Destroy(ObjectsToDestroy[i].gameObject);
         }
         ObjectsToDestroy.Clear();
@@ -85,7 +89,6 @@ public class GameState : MonoBehaviour
         if(RtsObjects.ContainsKey(id))
         {
             var foundUnit = RtsObjects[id];
-            RtsObjects.Remove(id);
             foundUnit.IsAlive = false;
             ObjectsToDestroy.Add(foundUnit);
         }

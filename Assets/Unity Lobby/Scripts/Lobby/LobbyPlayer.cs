@@ -24,6 +24,8 @@ namespace Prototype.NetworkLobby
         public GameObject localIcone;
         public GameObject remoteIcone;
 
+        public Text IdLabel;
+
         //OnMyName function will be invoked on clients when server change the value of playerName
         [SyncVar(hook = "OnMyName")]
         public string playerName = "";
@@ -37,6 +39,10 @@ namespace Prototype.NetworkLobby
         static Color NotReadyColor = new Color(34.0f / 255.0f, 44 / 255.0f, 55.0f / 255.0f, 1.0f);
         static Color ReadyColor = new Color(0.0f, 204.0f / 255.0f, 204.0f / 255.0f, 1.0f);
         static Color TransparentColor = new Color(0, 0, 0, 0);
+
+        // Unique id
+        [SyncVar(hook = "OnMyId")]
+        public int Id;
 
         //static Color OddRowColor = new Color(250.0f / 255.0f, 250.0f / 255.0f, 250.0f / 255.0f, 1.0f);
         //static Color EvenRowColor = new Color(180.0f / 255.0f, 180.0f / 255.0f, 180.0f / 255.0f, 1.0f);
@@ -64,6 +70,7 @@ namespace Prototype.NetworkLobby
             //will be created with the right value currently on server
             OnMyName(playerName);
             OnMyColor(playerColor);
+            OnMyId(Id);
         }
 
         public override void OnStartAuthority()
@@ -194,6 +201,12 @@ namespace Prototype.NetworkLobby
             playerColor = newColor;
             colorButton.GetComponent<Image>().color = newColor;
         }
+        
+        public void OnMyId(int id)
+        {
+            Id = id;
+            IdLabel.text = id.ToString();
+        }
 
         //===== UI Handler
 
@@ -243,7 +256,7 @@ namespace Prototype.NetworkLobby
         {
             CheckRemoveButton();
         }
-
+        
         //====== Server Command
 
         [Command]

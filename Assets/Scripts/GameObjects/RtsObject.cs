@@ -55,6 +55,8 @@ public class RtsObject : MonoBehaviour
         IsAlive = true;
     }
     
+    // All objects that want to be updated in a synchronized way must put their update logic in 
+    // GameUpdate and not Update(), because that is what the sim code will call.
     public virtual void GameUpdate(float deltaSeconds)
     {
         

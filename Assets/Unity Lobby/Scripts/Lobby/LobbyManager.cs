@@ -5,6 +5,7 @@ using UnityEngine.Networking;
 using UnityEngine.Networking.Types;
 using UnityEngine.Networking.Match;
 using System.Collections;
+using System.Collections.Generic;
 
 
 namespace Prototype.NetworkLobby
@@ -52,6 +53,8 @@ namespace Prototype.NetworkLobby
         protected ulong _currentMatchID;
 
         protected LobbyHook _lobbyHooks;
+
+        private List<int> _usedIds = new List<int>();
 
         void Start()
         {
@@ -277,8 +280,17 @@ namespace Prototype.NetworkLobby
 
             LobbyPlayer newPlayer = obj.GetComponent<LobbyPlayer>();
             newPlayer.ToggleJoinButton(numPlayers + 1 >= minPlayers);
-
-
+            
+            for(int i = 1; i < maxPlayers; i++)
+            {
+                if(!_usedIds.Contains(i))
+                {
+                    newPlayer.Id = i;
+                    _usedIds.Add(i);
+                    break;
+                }
+            }
+            
             for (int i = 0; i < lobbySlots.Length; ++i)
             {
                 LobbyPlayer p = lobbySlots[i] as LobbyPlayer;
