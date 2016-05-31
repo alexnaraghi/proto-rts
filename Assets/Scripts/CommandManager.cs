@@ -10,13 +10,25 @@ public class CommandManager : MonoBehaviour
     public List<string> DebugCommandHistory = new List<string>();
 
     private List<IPlayer> _players = new List<IPlayer>();
-    private float _accumulatedTime;
-    private float _frameSeconds = 0.033333f;
+    
+    // The number of frames the simulation is running at.
+    private float _frameSeconds = 1f / 60f;
+    
+    // The frequency that we send pending commands to other clients.
+    private float _commandSendSeconds = 1 / 60f;
 
-    private int _gameFramesPerLockStepTurn = 6;
+    // The frame count for processing a single lock step.
+    private int _gameFramesPerLockStepTurn = 15;
 
-    public int SendFrameDelay = 3;
+    // The number of locksteps ahead the commands are from the simulation.
+    [System.NonSerialized]
+    public int SendLockstepDelay = 3;
+    
+    // Some timing counters.
     private int _frame = 0;
+    private float _commandTime;
+    private float _accumulatedTime;
+
 
     public int LockStep
     {
@@ -42,37 +54,61 @@ public class CommandManager : MonoBehaviour
     {
         _players.Remove(player);
     }
+
+    public List<IPlayer> GetAllPlayers()
+    {
+        return _players;
+    }
     
-    // This is the main update loop of the game simulation.
+    public IPlayer GetLocalPlayer()
+    {
+        IPlayer localPlayer = null;
+
+        foreach (var player in _players)
+        {
+            if (player.IsLocalPlayer)
+            {
+                localPlayer = player;
+            }
+        }
+
+        return localPlayer;
+    }
+
+    // This is the main update loop.
     public void Update()
     {
         _accumulatedTime += Time.deltaTime;
+        _commandTime += Time.deltaTime;
 
+        // Sending commands is on a different timer than the game simulation.
+        if (_commandTime > _commandSendSeconds)
+        {
+            sendCommands();
+            _commandTime = 0f;
+        }
+
+        // Execute the game simulation.
         while (_accumulatedTime > _frameSeconds)
         {
-            GameFrameTurn();
+            gameFrameTurn();
             _accumulatedTime -= _frameSeconds;
         }
     }
 
     // A game frame turn executes a single step of the simulation.
-    private void GameFrameTurn()
+    private void gameFrameTurn()
     {
         bool isWaiting = false;
-        
+
         // This is the first frame of the lockstep.
         if (_frame == 0)
         {
-            // Each player should process their commands.
-            foreach (var player in _players)
-            {
-                player.SendCommands(LockStep, _players);
-            }
 
             // If players are ready for this lockstep, let them execute their commands.  Otherwise, wait.
-            if (IsLockStepReady())
+            if (isLockStepReady())
             {
-                ExecuteCommands();
+                executeCommands();
                 LockStep++;
             }
             else
@@ -80,7 +116,7 @@ public class CommandManager : MonoBehaviour
                 isWaiting = true;
             }
         }
-        
+
         // Wait for lockstep to be processed before continuing
         if (!isWaiting)
         {
@@ -110,10 +146,10 @@ public class CommandManager : MonoBehaviour
             }
         }
     }
-    
-    private bool IsLockStepReady()
+
+    private bool isLockStepReady()
     {
-//        int expectedPlayers = _players.Count;
+        //        int expectedPlayers = _players.Count;
         //TODO: Add this to lobby params
         int expectedPlayers = 2;
         int readyPlayers = 0;
@@ -128,30 +164,24 @@ public class CommandManager : MonoBehaviour
         return expectedPlayers == readyPlayers;
     }
 
-    private void ExecuteCommands()
+    private void executeCommands()
     {
         for (int i = 0; i < _players.Count; i++)
         {
             var command = _players[i].ProcessLockstep(LockStep);
-            if(command != null)
+            if (command != null)
             {
                 command.Execute();
             }
         }
     }
-    
-    public IPlayer GetLocalPlayer()
-    {
-        IPlayer localPlayer = null;
-        
-        foreach(var player in _players)
-        {
-            if(player.IsLocalPlayer)
-            {
-                localPlayer = player;
-            }
-        }
 
-        return localPlayer;
+    private void sendCommands()
+    {
+        // Each player should process their commands.
+        foreach (var player in _players)
+        {
+            player.SendCommands(LockStep, _players);
+        }
     }
 }

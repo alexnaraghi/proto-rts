@@ -5,7 +5,6 @@ using UnityEngine.Assertions;
 // This is a command logger, for debugging.
 public class NetCommandMonitor : MonoBehaviour 
 {
-    public RtsNetworkPlayer Player;
     public Button ButtonPrefab;
 
     public Text RemoteOrLocalText;
@@ -13,46 +12,52 @@ public class NetCommandMonitor : MonoBehaviour
     public GameObject Content;
 
     private CommandListElement[] _elements;
-
     private int _highestElement;
-
     private int _newestKnownLockstep;
-	const int ELEMENT_LENGTH = 10;
+	const int ELEMENT_LENGTH = 25;
+    private RtsNetworkPlayer Player;
 
-    private float _offset = 200;
+    private int _lastHighlightedIndex;
+    private int _lastLockstepColoredIndex;
 
-    private static int _numMonitors;
+    private Color _unhighlightedColor = Color.white;
+    private Color _highlightedColor = Color.yellow;
+    private Color _lockstepColor = Color.cyan;
 
     void Start () 
 	{
-        Assert.IsNotNull(Player);
         Assert.IsNotNull(ButtonPrefab);
         Assert.IsNotNull(Content);
         Assert.IsNotNull(RemoteOrLocalText);
-
-        RemoteOrLocalText.text = Player.isLocalPlayer ? "Local " + Player.Id : "Remote" + Player.Id;
+    }
+    
+    public void AttachPlayer(RtsNetworkPlayer player)
+    {
+        Player = player;
+        
+        //Assert.IsNotNull(Player);
 
         _elements = new CommandListElement[ELEMENT_LENGTH];
         for(int i = 0; i < ELEMENT_LENGTH; i++)
 		{
             _elements[i] = new CommandListElement();
             _elements[i].Button = Instantiate(ButtonPrefab);
+            _elements[i].Image = _elements[i].Button.GetComponent<Image>();
             _elements[i].Button.transform.SetParent(Content.transform, false);
         }
 		
         if(Player != null)
 		{
+            RemoteOrLocalText.text = Player.isLocalPlayer ? "Local " + Player.Id : "Remote" + Player.Id;
             Player.CommandAddedEvent += OnCommandAdded;
         }
-        
-        this.transform.localPosition = new Vector3(_offset * _numMonitors, 0, 0);
-        _numMonitors++;
     }
 
     private void OnCommandAdded(NetUnitCommand command)
     {
 		var lockStep = command.LockStep;
-		
+
+
         int difference = lockStep - _newestKnownLockstep;
 		if (lockStep < _newestKnownLockstep - ELEMENT_LENGTH)
 		{
@@ -84,7 +89,7 @@ public class NetCommandMonitor : MonoBehaviour
     // Gets the index at difference units away from the highest index.
     private int OffsetFromHighIndex(int difference)
     {
-        return Mathf.Abs((_highestElement + difference) % (ELEMENT_LENGTH - 1));
+        return Mathf.Abs((_highestElement + difference) % (ELEMENT_LENGTH));
     }
     
     private void UnsetElement(int index)
@@ -102,6 +107,22 @@ public class NetCommandMonitor : MonoBehaviour
         _elements[index].Command = command;
         _elements[index].HasCommand = true;
         SetButtonText(index, command);
+        
+        
+        // This shouldn't really be synced on commands added, it should probably listen for a lockstep
+        // update event.
+        var realLockstep = Injector.Get<CommandManager>().LockStep;
+        for(int i = 0; i < _elements.Length; i++)
+        {
+            var element = _elements[i];
+            if(element.HasCommand && element.Command.LockStep == realLockstep)
+            {
+                SetLockstepColor(i);
+                break;
+            }
+        }
+        
+        SetHighlight(index);
     }
 	
 	private void SetButtonText(int buttonIndex, NetUnitCommand command)
@@ -117,15 +138,41 @@ public class NetCommandMonitor : MonoBehaviour
 		text.text = newText;
 	}
     
+    private void SetHighlight(int buttonIndex)
+    {
+        if(_elements[_lastHighlightedIndex] != null)
+        {
+            _elements[_lastHighlightedIndex].Image.color = _unhighlightedColor;
+        }
+
+        _elements[buttonIndex].Image.color = _highlightedColor;
+        _lastHighlightedIndex = buttonIndex;
+    }
+    
+    private void SetLockstepColor(int buttonIndex)
+    {
+        if(_elements[_lastLockstepColoredIndex] != null)
+        {
+            _elements[_lastLockstepColoredIndex].Image.color = _unhighlightedColor;
+        }
+
+        _elements[buttonIndex].Image.color = _lockstepColor;
+        _lastLockstepColoredIndex = buttonIndex;
+    }
+    
     void OnDestroy()
     {
-        _numMonitors--;
+        if(Player != null)
+		{
+            Player.CommandAddedEvent -= OnCommandAdded;
+        }
     }
 }
 
 public class CommandListElement
 {
     public Button Button;
+    public Image Image;
 
     public bool HasCommand;
     public NetUnitCommand Command;

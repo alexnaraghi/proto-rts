@@ -35,7 +35,7 @@ public class RtsNetworkPlayer : NetworkBehaviour, IPlayer
         cmdManager.RegisterPlayer(this);
         
         // Buffer up fake packets for the initial locksteps before the send frame delay.
-        for(int i = 0; i < cmdManager.SendFrameDelay; i++)
+        for(int i = 0; i < cmdManager.SendLockstepDelay; i++)
         {
             CommandBuffer.Add(new NetUnitCommand(i, new NoOpCommand(1)));
             ConfirmationBuffer.Add(new Confirmation(i));
@@ -43,7 +43,7 @@ public class RtsNetworkPlayer : NetworkBehaviour, IPlayer
         
         // Set the lockstep to the one before the first to send, so that when
         // we increment to the first lockstep, it will be correct.
-        _pendingCommandLockStep = cmdManager.SendFrameDelay - 1;
+        _pendingCommandLockStep = cmdManager.SendLockstepDelay - 1;
     }
 
     void OnDestroy()
@@ -80,7 +80,7 @@ public class RtsNetworkPlayer : NetworkBehaviour, IPlayer
             // same lockstep desyncs the simulation, investigate this.
             if(_pendingLocalCommand == null || 
                 (numReadyPlayers == players.Count 
-                && _pendingCommandLockStep != lockStep + cmdManager.SendFrameDelay))
+                && _pendingCommandLockStep != lockStep + cmdManager.SendLockstepDelay))
             {
                 if(localCommands.Count > 0)
                 {

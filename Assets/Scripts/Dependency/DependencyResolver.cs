@@ -9,5 +9,8 @@ public class DependencyResolver : MonoBehaviour
 #if UNITY_STANDALONE || UNITY_EDITOR || UNITY_WEBPLAYER
         Injector.AddComponent<RtsInput, KeyboardAndMouseInput>();
 #endif
+
+        //TODO: If debug mode.
+        Injector.AddComponent<DebugManager>();
     }
 }
